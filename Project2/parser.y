@@ -46,6 +46,8 @@ void yyerror(const char *msg); // standard error-handling routine
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Decl *decl;
     List<Decl*> *declList;
+    VarDecl *vardecl;
+    Type *type;
 }
 
 
@@ -91,6 +93,8 @@ void yyerror(const char *msg); // standard error-handling routine
  */
 %type <declList>  DeclList 
 %type <decl>      Decl
+%type <vardecl>   VarDecl
+%type <type>  Type
 
 %%
 /* Rules
@@ -115,10 +119,15 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    T_Void               { $$ = new VarDecl(); /* pp2: test only. Replace with correct rules  */ } 
+Decl      :    VarDecl                   
           ;
           
+VarDecl   :   Type T_Identifier ';'    { $$ = new VarDecl(new Identifier(@2, $2),$1);}
+	  ;
 
+Type      :  T_Int    			{ $$ = Type::intType;}  
+  	  |  T_Float
+          ;
 
 %%
 
