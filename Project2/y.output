@@ -1,0 +1,141 @@
+Terminals unused in grammar
+
+   T_Bool
+   T_Int
+   T_Float
+   T_LessEqual
+   T_GreaterEqual
+   T_Equal
+   T_NotEqual
+   T_Dims
+   T_And
+   T_Or
+   T_While
+   T_For
+   T_If
+   T_Else
+   T_Return
+   T_Break
+   T_Inc
+   T_Dec
+   T_Switch
+   T_Case
+   T_Default
+   T_Identifier
+   T_IntConstant
+   T_FloatConstant
+   T_BoolConstant
+
+
+Grammar
+
+    0 $accept: Program $end
+
+    1 Program: DeclList
+
+    2 DeclList: DeclList Decl
+    3         | Decl
+
+    4 Decl: T_Void
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+T_Void (258) 4
+T_Bool (259)
+T_Int (260)
+T_Float (261)
+T_LessEqual (262)
+T_GreaterEqual (263)
+T_Equal (264)
+T_NotEqual (265)
+T_Dims (266)
+T_And (267)
+T_Or (268)
+T_While (269)
+T_For (270)
+T_If (271)
+T_Else (272)
+T_Return (273)
+T_Break (274)
+T_Inc (275)
+T_Dec (276)
+T_Switch (277)
+T_Case (278)
+T_Default (279)
+T_Identifier (280)
+T_IntConstant (281)
+T_FloatConstant (282)
+T_BoolConstant (283)
+
+
+Nonterminals, with rules where they appear
+
+$accept (29)
+    on left: 0
+Program (30)
+    on left: 1, on right: 0
+DeclList (31)
+    on left: 2 3, on right: 1 2
+Decl (32)
+    on left: 4, on right: 2 3
+
+
+state 0
+
+    0 $accept: . Program $end
+
+    T_Void  shift, and go to state 1
+
+    Program   go to state 2
+    DeclList  go to state 3
+    Decl      go to state 4
+
+
+state 1
+
+    4 Decl: T_Void .
+
+    $default  reduce using rule 4 (Decl)
+
+
+state 2
+
+    0 $accept: Program . $end
+
+    $end  shift, and go to state 5
+
+
+state 3
+
+    1 Program: DeclList .
+    2 DeclList: DeclList . Decl
+
+    T_Void  shift, and go to state 1
+
+    $default  reduce using rule 1 (Program)
+
+    Decl  go to state 6
+
+
+state 4
+
+    3 DeclList: Decl .
+
+    $default  reduce using rule 3 (DeclList)
+
+
+state 5
+
+    0 $accept: Program $end .
+
+    $default  accept
+
+
+state 6
+
+    2 DeclList: DeclList Decl .
+
+    $default  reduce using rule 2 (DeclList)
