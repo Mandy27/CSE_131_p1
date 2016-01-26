@@ -51,6 +51,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Type *type;
     Expr *expr;
     List<VarDecl*> *param;
+    Identifier *identify;
 
 }
 
@@ -102,6 +103,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <expr>  Expr
 %type <fndecl> FnDecl
 %type <param>  Param
+%type <vardecl>    Var
+%type <identify> Identifier
 
 %%
 /* Rules
@@ -130,23 +133,29 @@ Decl      :    VarDecl              {$$ = $1;}
  	  |    FnDecl               {$$ = $1;}
           ;
           
-VarDecl   :   Type T_Identifier ';'           { $$ = new VarDecl(new Identifier(@2, $2), $1);}
-          |   Type T_Identifier '=' Expr ';'  {}
+VarDecl   :   Var ';'          	    { $$ = $1;}
+          |   Var '=' Expr ';'      {}
 	  ;
+
+Var       :  Type Identifier        			 {$$= new VarDecl($2,$1);}
+          ;
+
+Identifier:  T_Identifier   	                          {$$=new Identifier(@1, $1);}
+          ;
 
 Type      :  T_Int    			{ $$ = Type::intType;}  
   	  |  T_Float			{ $$ = Type::floatType;}
 	  |  T_Bool  			{ $$ = Type::boolType;} 
           ;
 
-FnDecl	  :  Type T_Identifier '(' Param ')'   '{''}'      { $$ = new FnDecl(new Identifier(@2,$2), $1, $4);} 
-  	  |  T_Void T_Identifier '(' Param ')' '{''}'      { $$ = new FnDecl(new Identifier(@2,$2), Type::voidType, $4);} 
+FnDecl	  :  Type Identifier '(' Param ')'   '{''}'      { $$ = new FnDecl($2, $1, $4);} 
+  	  |  T_Void Identifier '(' Param ')' '{''}'      { $$ = new FnDecl($2, Type::voidType, $4);} 
 	  ;
 
-Param	  : Param ',' Type T_Identifier                   {}
- 	  | Type T_Identifier  				  {}
+Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
+ 	  | Var          				  {$$ = (new List<VarDecl*>)->Append($1);}
 /*no param*/
-	  |						  {}                             
+	  |						  {$$ = new List<VarDecl*>;}                             
 	  ;
 
 Expr 	  : T_IntConstant				  {}
