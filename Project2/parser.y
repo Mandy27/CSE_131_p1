@@ -120,13 +120,14 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           ;
 
 Decl      :    VarDecl                   
+  	  |    T_Identifier ';'     { }
           ;
           
-VarDecl   :   Type T_Identifier ';'    { $$ = new VarDecl(new Identifier(@2, $2),$1);}
+VarDecl   :   Type T_Identifier ';'    { $$ = new VarDecl(new Identifier(@2, $2), $1);}
 	  ;
 
 Type      :  T_Int    			{ $$ = Type::intType;}  
-  	  |  T_Float
+  	  |  T_Float			{ $$ = Type::floatType;}
           ;
 
 %%

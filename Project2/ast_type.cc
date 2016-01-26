@@ -17,6 +17,7 @@
 
 Type *Type::intType    = new Type("int");
 Type *Type::doubleType = new Type("double");
+Type *Type::floatType  = new Type("float");
 Type *Type::voidType   = new Type("void");
 Type *Type::boolType   = new Type("bool");
 Type *Type::nullType   = new Type("null");

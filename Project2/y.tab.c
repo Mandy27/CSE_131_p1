@@ -117,28 +117,63 @@ void yyerror(const char *msg); // standard error-handling routine
      T_Bool = 259,
      T_Int = 260,
      T_Float = 261,
-     T_LessEqual = 262,
-     T_GreaterEqual = 263,
-     T_Equal = 264,
-     T_NotEqual = 265,
-     T_Dims = 266,
-     T_And = 267,
-     T_Or = 268,
-     T_While = 269,
-     T_For = 270,
-     T_If = 271,
-     T_Else = 272,
-     T_Return = 273,
-     T_Break = 274,
-     T_Inc = 275,
-     T_Dec = 276,
-     T_Switch = 277,
-     T_Case = 278,
-     T_Default = 279,
-     T_Identifier = 280,
-     T_IntConstant = 281,
-     T_FloatConstant = 282,
-     T_BoolConstant = 283
+     T_Vec2 = 262,
+     T_Vec3 = 263,
+     T_Vec4 = 264,
+     T_Mat2 = 265,
+     T_Mat3 = 266,
+     T_Mat4 = 267,
+     T_In = 268,
+     T_Out = 269,
+     T_Uniform = 270,
+     T_Layout = 271,
+     T_LessEqual = 272,
+     T_GreaterEqual = 273,
+     T_Equal = 274,
+     T_NotEqual = 275,
+     T_Dims = 276,
+     T_And = 277,
+     T_Or = 278,
+     T_While = 279,
+     T_For = 280,
+     T_If = 281,
+     T_Else = 282,
+     T_Return = 283,
+     T_Break = 284,
+     T_Continue = 285,
+     T_Inc = 286,
+     T_Dec = 287,
+     T_Switch = 288,
+     T_Case = 289,
+     T_Default = 290,
+     T_FieldSelection = 291,
+     T_IncOp = 292,
+     T_DecOp = 293,
+     T_LeOp = 294,
+     T_GeOp = 295,
+     T_EqOp = 296,
+     T_NeOp = 297,
+     T_AndOp = 298,
+     T_OrOp = 299,
+     T_MulAssign = 300,
+     T_DivAssign = 301,
+     T_AddAssign = 302,
+     T_SubAssign = 303,
+     T_LeftParen = 304,
+     T_RightParen = 305,
+     T_LeftBrace = 306,
+     T_RightBrace = 307,
+     T_Dot = 308,
+     T_Dash = 309,
+     T_Plus = 310,
+     T_Star = 311,
+     T_Slash = 312,
+     T_LeftAngle = 313,
+     T_RightAngle = 314,
+     T_Identifier = 315,
+     T_IntConstant = 316,
+     T_FloatConstant = 317,
+     T_BoolConstant = 318
    };
 #endif
 /* Tokens.  */
@@ -146,28 +181,63 @@ void yyerror(const char *msg); // standard error-handling routine
 #define T_Bool 259
 #define T_Int 260
 #define T_Float 261
-#define T_LessEqual 262
-#define T_GreaterEqual 263
-#define T_Equal 264
-#define T_NotEqual 265
-#define T_Dims 266
-#define T_And 267
-#define T_Or 268
-#define T_While 269
-#define T_For 270
-#define T_If 271
-#define T_Else 272
-#define T_Return 273
-#define T_Break 274
-#define T_Inc 275
-#define T_Dec 276
-#define T_Switch 277
-#define T_Case 278
-#define T_Default 279
-#define T_Identifier 280
-#define T_IntConstant 281
-#define T_FloatConstant 282
-#define T_BoolConstant 283
+#define T_Vec2 262
+#define T_Vec3 263
+#define T_Vec4 264
+#define T_Mat2 265
+#define T_Mat3 266
+#define T_Mat4 267
+#define T_In 268
+#define T_Out 269
+#define T_Uniform 270
+#define T_Layout 271
+#define T_LessEqual 272
+#define T_GreaterEqual 273
+#define T_Equal 274
+#define T_NotEqual 275
+#define T_Dims 276
+#define T_And 277
+#define T_Or 278
+#define T_While 279
+#define T_For 280
+#define T_If 281
+#define T_Else 282
+#define T_Return 283
+#define T_Break 284
+#define T_Continue 285
+#define T_Inc 286
+#define T_Dec 287
+#define T_Switch 288
+#define T_Case 289
+#define T_Default 290
+#define T_FieldSelection 291
+#define T_IncOp 292
+#define T_DecOp 293
+#define T_LeOp 294
+#define T_GeOp 295
+#define T_EqOp 296
+#define T_NeOp 297
+#define T_AndOp 298
+#define T_OrOp 299
+#define T_MulAssign 300
+#define T_DivAssign 301
+#define T_AddAssign 302
+#define T_SubAssign 303
+#define T_LeftParen 304
+#define T_RightParen 305
+#define T_LeftBrace 306
+#define T_RightBrace 307
+#define T_Dot 308
+#define T_Dash 309
+#define T_Plus 310
+#define T_Star 311
+#define T_Slash 312
+#define T_LeftAngle 313
+#define T_RightAngle 314
+#define T_Identifier 315
+#define T_IntConstant 316
+#define T_FloatConstant 317
+#define T_BoolConstant 318
 
 
 
@@ -186,11 +256,13 @@ typedef union YYSTYPE
     char identifier[MaxIdentLen+1]; // +1 for terminating null
     Decl *decl;
     List<Decl*> *declList;
+    VarDecl *vardecl;
+    Type *type;
 
 
 
 /* Line 214 of yacc.c  */
-#line 194 "y.tab.c"
+#line 266 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -215,7 +287,7 @@ typedef struct YYLTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 219 "y.tab.c"
+#line 291 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -430,22 +502,22 @@ union yyalloc
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  5
+#define YYFINAL  10
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   2
+#define YYLAST   55
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  29
+#define YYNTOKENS  65
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  4
+#define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  5
+#define YYNRULES  9
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  7
+#define YYNSTATES  14
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   283
+#define YYMAXUTOK   318
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -458,7 +530,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    64,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -481,7 +553,10 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,    59,    60,    61,    62,    63
 };
 
 #if YYDEBUG
@@ -489,20 +564,21 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     8,    10
+       0,     0,     3,     5,     8,    10,    12,    15,    19,    21
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      30,     0,    -1,    31,    -1,    31,    32,    -1,    32,    -1,
-       3,    -1
+      66,     0,    -1,    67,    -1,    67,    68,    -1,    68,    -1,
+      69,    -1,    60,    64,    -1,    70,    60,    64,    -1,     5,
+      -1,     6,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    91,    91,   103,   104,   107
+       0,   106,   106,   118,   119,   122,   123,   126,   129,   130
 };
 #endif
 
@@ -512,11 +588,17 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "T_Void", "T_Bool", "T_Int", "T_Float",
-  "T_LessEqual", "T_GreaterEqual", "T_Equal", "T_NotEqual", "T_Dims",
-  "T_And", "T_Or", "T_While", "T_For", "T_If", "T_Else", "T_Return",
-  "T_Break", "T_Inc", "T_Dec", "T_Switch", "T_Case", "T_Default",
+  "T_Vec2", "T_Vec3", "T_Vec4", "T_Mat2", "T_Mat3", "T_Mat4", "T_In",
+  "T_Out", "T_Uniform", "T_Layout", "T_LessEqual", "T_GreaterEqual",
+  "T_Equal", "T_NotEqual", "T_Dims", "T_And", "T_Or", "T_While", "T_For",
+  "T_If", "T_Else", "T_Return", "T_Break", "T_Continue", "T_Inc", "T_Dec",
+  "T_Switch", "T_Case", "T_Default", "T_FieldSelection", "T_IncOp",
+  "T_DecOp", "T_LeOp", "T_GeOp", "T_EqOp", "T_NeOp", "T_AndOp", "T_OrOp",
+  "T_MulAssign", "T_DivAssign", "T_AddAssign", "T_SubAssign",
+  "T_LeftParen", "T_RightParen", "T_LeftBrace", "T_RightBrace", "T_Dot",
+  "T_Dash", "T_Plus", "T_Star", "T_Slash", "T_LeftAngle", "T_RightAngle",
   "T_Identifier", "T_IntConstant", "T_FloatConstant", "T_BoolConstant",
-  "$accept", "Program", "DeclList", "Decl", 0
+  "';'", "$accept", "Program", "DeclList", "Decl", "VarDecl", "Type", 0
 };
 #endif
 
@@ -527,20 +609,24 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280,   281,   282,   283
+     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295,   296,   297,   298,   299,   300,   301,   302,   303,   304,
+     305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
+     315,   316,   317,   318,    59
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    29,    30,    31,    31,    32
+       0,    65,    66,    67,    67,    68,    68,    69,    70,    70
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     2,     1,     1
+       0,     2,     1,     2,     1,     1,     2,     3,     1,     1
 };
 
 /* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
@@ -548,27 +634,29 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     5,     0,     2,     4,     1,     3
+       0,     8,     9,     0,     0,     2,     4,     5,     0,     6,
+       1,     3,     0,     7
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,     4
+      -1,     4,     5,     6,     7,     8
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -4
+#define YYPACT_NINF -63
 static const yytype_int8 yypact[] =
 {
-      -3,    -4,     1,    -3,    -4,    -4,    -4
+      -5,   -63,   -63,   -62,     3,    -5,   -63,   -63,   -56,   -63,
+     -63,   -63,   -59,   -63
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -4,    -4,    -4,    -1
+     -63,   -63,   -63,     1,   -63,   -63
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -578,19 +666,30 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       1,     5,     6
+       1,     2,     9,    10,    12,    13,    11,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     3
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
-       3,     0,     3
+       5,     6,    64,     0,    60,    64,     5,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1,
+      -1,    -1,    -1,    -1,    -1,    60
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
    symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    30,    31,    32,     0,    32
+       0,     5,     6,    60,    66,    67,    68,    69,    70,    64,
+       0,    68,    60,    64
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -1439,7 +1538,7 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 91 "parser.y"
+#line 106 "parser.y"
     { 
                                       (yylsp[(1) - (1)]); 
                                       /* pp2: The @1 is needed to convince 
@@ -1455,28 +1554,49 @@ yyreduce:
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 103 "parser.y"
+#line 118 "parser.y"
     { ((yyval.declList)=(yyvsp[(1) - (2)].declList))->Append((yyvsp[(2) - (2)].decl)); }
     break;
 
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 104 "parser.y"
+#line 119 "parser.y"
     { ((yyval.declList) = new List<Decl*>)->Append((yyvsp[(1) - (1)].decl)); }
     break;
 
-  case 5:
+  case 6:
 
 /* Line 1455 of yacc.c  */
-#line 107 "parser.y"
-    { (yyval.decl) = new VarDecl(); /* pp2: test only. Replace with correct rules  */ }
+#line 123 "parser.y"
+    { }
+    break;
+
+  case 7:
+
+/* Line 1455 of yacc.c  */
+#line 126 "parser.y"
+    { (yyval.vardecl) = new VarDecl(new Identifier((yylsp[(2) - (3)]), (yyvsp[(2) - (3)].identifier)), (yyvsp[(1) - (3)].type));}
+    break;
+
+  case 8:
+
+/* Line 1455 of yacc.c  */
+#line 129 "parser.y"
+    { (yyval.type) = Type::intType;}
+    break;
+
+  case 9:
+
+/* Line 1455 of yacc.c  */
+#line 130 "parser.y"
+    { (yyval.type) = Type::floatType;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1480 "y.tab.c"
+#line 1600 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1695,7 +1815,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 112 "parser.y"
+#line 133 "parser.y"
 
 
 /* The closing %% above marks the end of the Rules section and the beginning
