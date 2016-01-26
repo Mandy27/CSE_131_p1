@@ -47,7 +47,11 @@ void yyerror(const char *msg); // standard error-handling routine
     Decl *decl;
     List<Decl*> *declList;
     VarDecl *vardecl;
+    FnDecl *fndecl;
     Type *type;
+    Expr *expr;
+    List<VarDecl*> *param;
+
 }
 
 
@@ -95,6 +99,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <decl>      Decl
 %type <vardecl>   VarDecl
 %type <type>  Type
+%type <expr>  Expr
+%type <fndecl> FnDecl
+%type <param>  Param
 
 %%
 /* Rules
@@ -119,17 +126,35 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    VarDecl                   
-  	  |    T_Identifier ';'     { }
+Decl      :    VarDecl              {$$ = $1;}
+ 	  |    FnDecl               {$$ = $1;}
           ;
           
-VarDecl   :   Type T_Identifier ';'    { $$ = new VarDecl(new Identifier(@2, $2), $1);}
+VarDecl   :   Type T_Identifier ';'           { $$ = new VarDecl(new Identifier(@2, $2), $1);}
+          |   Type T_Identifier '=' Expr ';'  {}
 	  ;
 
 Type      :  T_Int    			{ $$ = Type::intType;}  
   	  |  T_Float			{ $$ = Type::floatType;}
+	  |  T_Bool  			{ $$ = Type::boolType;} 
           ;
 
+FnDecl	  :  Type T_Identifier '(' Param ')'   '{''}'      { $$ = new FnDecl(new Identifier(@2,$2), $1, $4);} 
+  	  |  T_Void T_Identifier '(' Param ')' '{''}'      { $$ = new FnDecl(new Identifier(@2,$2), Type::voidType, $4);} 
+	  ;
+
+Param	  : Param ',' Type T_Identifier                   {}
+ 	  | Type T_Identifier  				  {}
+/*no param*/
+	  |						  {}                             
+	  ;
+
+Expr 	  : T_IntConstant				  {}
+	  | T_FloatConstant				  {}
+	  | T_BoolConstant			          {}
+
+	  | '(' Expr ')'				  {}
+	  ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
