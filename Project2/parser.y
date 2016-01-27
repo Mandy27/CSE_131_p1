@@ -182,11 +182,11 @@ Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
 	  ;
 
 Expr 	  : T_IntConstant				  {}
+          | AssignExpr                                    {}
 	  | T_FloatConstant				  {}
 	  | T_BoolConstant			          {}
           | Identifier					  {}
 	  | '(' Expr ')'				  {}
-	  | AssignExpr					  {}
 	  ;
 
 MulExpr   : UnaryExpr	/*multiplicative*/		  {}
@@ -217,6 +217,8 @@ LogAndExpr: EqualityExpr				{}
 LogOrExpr : LogAndExpr					{}
 	  | LogOrExpr T_OrOp LogAndExpr			{}
 	  ;
+
+
 
 AssignExpr: LogOrExpr					{}
 	  | UnaryExpr '='  AssignExpr			{}
