@@ -50,6 +50,15 @@ void yyerror(const char *msg); // standard error-handling routine
     FnDecl *fndecl;
     Type *type;
     Expr *expr;
+    PostfixExpr *postexpr;  //cant declare PostExpr
+    ArithmeticExpr *mulexpr;
+    ArithmeticExpr *addexpr;
+    RelationalExpr *relativeexpr;
+    EqualityExpr  *equalityExpr;
+    LogicalExpr  *logandexpr;
+    LogicalExpr  *logorexpr;
+    AssignExpr   *assignexpr;
+    CompoundExpr *unaryExpr; 
     List<VarDecl*> *param;
     Identifier *identify;
 
@@ -101,11 +110,19 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <vardecl>   VarDecl
 %type <type>  Type
 %type <expr>  Expr
+%type <postexpr> PostExpr
+%type <unaryexpr> UnaryExpr
 %type <fndecl> FnDecl
 %type <param>  Param
 %type <vardecl>    Var
 %type <identify> Identifier
-
+%type <mulexpr> MulExpr
+%type <addexpr> AddExpr
+%type <relativeexpr> RelativeExpr
+%type <equalityexpr> EqualityExpr
+%type <logandexpr> LogAndExpr
+%type <logorexpr> LogOrExpr
+%type <assignexpr> AssignExpr
 %%
 /* Rules
  * -----
@@ -129,12 +146,12 @@ DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
           |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    VarDecl              {$$ = $1;}
+Decl      :    VarDecl ';'             {$$ = $1;}
  	  |    FnDecl               {$$ = $1;}
           ;
           
-VarDecl   :   Var ';'          	    { $$ = $1;}
-          |   Var '=' Expr ';'      {}
+VarDecl   :   Var           	    { $$ = $1;}
+          |   Var '=' Expr          {}
 	  ;
 
 Var       :  Type Identifier        			 {$$= new VarDecl($2,$1);}
@@ -146,14 +163,20 @@ Identifier:  T_Identifier   	                          {$$=new Identifier(@1, $1
 Type      :  T_Int    			{ $$ = Type::intType;}  
   	  |  T_Float			{ $$ = Type::floatType;}
 	  |  T_Bool  			{ $$ = Type::boolType;} 
+	  |  T_Vec2			{}
+	  |  T_Vec3			{}
+	  |  T_Vec4			{}
+	  |  T_Mat2			{}
+	  |  T_Mat3			{}
+	  |  T_Mat4			{}
           ;
 
-FnDecl	  :  Type Identifier '(' Param ')'   '{''}'      { $$ = new FnDecl($2, $1, $4);} 
-  	  |  T_Void Identifier '(' Param ')' '{''}'      { $$ = new FnDecl($2, Type::voidType, $4);} 
+FnDecl	  :  Type Identifier '(' Param ')'               { $$ = new FnDecl($2, $1, $4);} 
+  	  |  T_Void Identifier '(' Param ')'             { $$ = new FnDecl($2, Type::voidType, $4);} 
 	  ;
 
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
- 	  | Var          				  {$$ = (new List<VarDecl*>)->Append($1);}
+ 	  | Var          				  {($$ = new List<VarDecl*>)->Append($1);}
 /*no param*/
 	  |						  {$$ = new List<VarDecl*>;}                             
 	  ;
@@ -161,8 +184,60 @@ Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
 Expr 	  : T_IntConstant				  {}
 	  | T_FloatConstant				  {}
 	  | T_BoolConstant			          {}
-
+          | Identifier					  {}
 	  | '(' Expr ')'				  {}
+	  | AssignExpr					  {}
+	  ;
+
+MulExpr   : UnaryExpr	/*multiplicative*/		  {}
+	  | Expr '*' Expr					{}
+	  | Expr '/' Expr
+
+AddExpr	  : MulExpr					{}
+          | Expr '+' Expr 				  {}
+	  | Expr '-' Expr				  {}
+	  ;
+
+RelativeExpr: AddExpr					{}
+	    | Expr '<' Expr				{}
+	    | Expr '>' Expr				{}
+	    | Expr "<=" Expr                               {}
+            | Expr ">=" Expr                               {}
+	    ;
+
+EqualityExpr: RelativeExpr				{}
+	    | Expr "==" Expr                               {}
+            | Expr "!=" Expr                               {}
+	    ;
+
+LogAndExpr: EqualityExpr				{}
+	  | LogAndExpr T_AndOp EqualityExpr 		{}
+	  ;
+
+LogOrExpr : LogAndExpr					{}
+	  | LogOrExpr T_OrOp LogAndExpr			{}
+	  ;
+
+AssignExpr: LogOrExpr					{}
+	  | UnaryExpr '='  AssignExpr			{}
+	  | UnaryExpr "*="  AssignExpr			{}
+	  | UnaryExpr "/="  AssignExpr			{}
+	  | UnaryExpr "+="  AssignExpr			{}
+	  | UnaryExpr "-="  AssignExpr			{}
+	  ;
+
+PostExpr  : Expr					  {}
+	  | PostExpr "++" 					{}
+	  | PostExpr "--" 					{}
+/*DOT FIELD_SELECLTION*/
+          | PostExpr '.' Identifier			{} 
+	  ;
+
+UnaryExpr : PostExpr					{}
+	  | "++" UnaryExpr				{}
+	  | "--" UnaryExpr				{}
+	  | '+' UnaryExpr				{}
+	  | '-' UnaryExpr				{}
 	  ;
 %%
 
