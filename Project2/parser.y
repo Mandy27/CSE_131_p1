@@ -50,6 +50,7 @@ void yyerror(const char *msg); // standard error-handling routine
     FnDecl *fndecl;
     Type *type;
     Expr *expr;
+    Expr *ex;
     PostfixExpr *postexpr;  //cant declare PostExpr
     ArithmeticExpr *mulexpr;
     ArithmeticExpr *addexpr;
@@ -110,6 +111,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <vardecl>   VarDecl
 %type <type>  Type
 %type <expr>  Expr
+%type <ex> Ex
 %type <postexpr> PostExpr
 %type <unaryexpr> UnaryExpr
 %type <fndecl> FnDecl
@@ -182,32 +184,34 @@ Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
 	  ;
 
 Expr 	  : T_IntConstant				  {}
-          | AssignExpr                                    {}
 	  | T_FloatConstant				  {}
 	  | T_BoolConstant			          {}
           | Identifier					  {}
-	  | '(' Expr ')'				  {}
+	  | '(' Ex ')'				  {}
 	  ;
+Ex 	  : AssignExpr {}
+;
 
 MulExpr   : UnaryExpr	/*multiplicative*/		  {}
-	  | Expr '*' Expr					{}
-	  | Expr '/' Expr
+	  | MulExpr '*' UnaryExpr					{}
+	  | MulExpr '/' UnaryExpr
+	  ;
 
 AddExpr	  : MulExpr					{}
-          | Expr '+' Expr 				  {}
-	  | Expr '-' Expr				  {}
+          | AddExpr '+' MulExpr 				  {}
+	  | AddExpr '-' MulExpr				  {}
 	  ;
 
 RelativeExpr: AddExpr					{}
-	    | Expr '<' Expr				{}
-	    | Expr '>' Expr				{}
-	    | Expr "<=" Expr                               {}
-            | Expr ">=" Expr                               {}
+	    | RelativeExpr '<' AddExpr				{}
+	    | RelativeExpr '>' AddExpr				{}
+	    | RelativeExpr "<=" AddExpr                               {}
+            | RelativeExpr ">=" AddExpr                               {}
 	    ;
 
 EqualityExpr: RelativeExpr				{}
-	    | Expr "==" Expr                               {}
-            | Expr "!=" Expr                               {}
+	    | EqualityExpr "==" RelativeExpr                               {}
+            | EqualityExpr "!=" RelativeExpr                               {}
 	    ;
 
 LogAndExpr: EqualityExpr				{}
