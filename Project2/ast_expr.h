@@ -201,5 +201,14 @@ class ActualsError : public Call
     ActualsError() : Call() { yyerror(this->GetPrintNameForNode()); }
     const char *GetPrintNameForNode() { return "ActualsError"; }
 };
+class VarExpr : public Expr
+{
+  protected:
+    Identifier *id;
+  public:
+    VarExpr(yyltype loc, Identifier *ident);
+    const char *GetPrintNameForNode() { return "VarExpr"; }
+    void PrintChildren(int identLevel);
+};
 
 #endif

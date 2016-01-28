@@ -183,12 +183,27 @@ typedef union YYSTYPE
     Decl *decl;
     List<Decl*> *declList;
     VarDecl *vardecl;
+    FnDecl *fndecl;
     Type *type;
+    Expr *expr;
+    Expr *ex;
+    PostfixExpr *postexpr;  //cant declare PostExpr
+    ArithmeticExpr *mulexpr;
+    ArithmeticExpr *addexpr;
+    RelationalExpr *relativeexpr;
+    EqualityExpr  *equalityExpr;
+    LogicalExpr  *logandexpr;
+    LogicalExpr  *logorexpr;
+    AssignExpr   *assignexpr;
+    CompoundExpr *unaryExpr; 
+    List<VarDecl*> *param;
+    Identifier *identify;
+
 
 
 
 /* Line 1676 of yacc.c  */
-#line 192 "y.tab.h"
+#line 207 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

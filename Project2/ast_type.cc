@@ -24,6 +24,13 @@ Type *Type::nullType   = new Type("null");
 Type *Type::stringType = new Type("string");
 Type *Type::errorType  = new Type("error"); 
 
+Type *Type::vec2Type  = new Type("vec2"); 
+Type *Type::vec3Type  = new Type("vec3"); 
+Type *Type::vec4Type = new Type("vec4");
+Type *Type::mat2Type = new Type("mat2");
+Type *Type::mat3Type = new Type("mat3");
+Type *Type::mat4Type = new Type("mat4");
+
 Type::Type(const char *n) {
     Assert(n);
     typeName = strdup(n);

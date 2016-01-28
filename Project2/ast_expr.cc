@@ -107,3 +107,9 @@ Call::Call(yyltype loc, Expr *b, Identifier *f, List<Expr*> *a) : Expr(loc)  {
     if (actuals) actuals->PrintAll(indentLevel+1, "(actuals) ");
   }
  
+VarExpr::VarExpr(yyltype loc, Identifier *ident) : Expr(loc) {
+  id = ident;
+}
+void VarExpr::PrintChildren(int identLevel) {
+  id->Print(identLevel + 1);
+}

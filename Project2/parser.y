@@ -165,12 +165,12 @@ Identifier:  T_Identifier   	                          {$$=new Identifier(@1, $1
 Type      :  T_Int    			{ $$ = Type::intType;}  
   	  |  T_Float			{ $$ = Type::floatType;}
 	  |  T_Bool  			{ $$ = Type::boolType;} 
-	  |  T_Vec2			{}
-	  |  T_Vec3			{}
-	  |  T_Vec4			{}
-	  |  T_Mat2			{}
-	  |  T_Mat3			{}
-	  |  T_Mat4			{}
+	  |  T_Vec2			{ $$ = Type::vec2Type;}
+	  |  T_Vec3			{ $$ = Type::vec3Type;}
+	  |  T_Vec4			{ $$ = Type::vec3Type;}
+	  |  T_Mat2			{ $$ = Type::mat2Type;}
+	  |  T_Mat3			{ $$ = Type::mat3Type;}
+	  |  T_Mat4			{ $$ = Type::mat4Type;}
           ;
 
 FnDecl	  :  Type Identifier '(' Param ')'               { $$ = new FnDecl($2, $1, $4);} 
