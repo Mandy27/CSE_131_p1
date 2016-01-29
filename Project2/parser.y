@@ -51,18 +51,19 @@ void yyerror(const char *msg); // standard error-handling routine
     Type *type;
     Expr *priexpr;
     Expr *expr;
-    PostfixExpr *postexpr;  //cant declare PostExpr
+    Expr *postexpr;  //cant declare PostExpr
     Expr *mulexpr;
     Expr *addexpr;
     Expr *relativeexpr;
-    Expr  *equalityexpr;
-    Expr  *logandexpr;
-    Expr  *logorexpr;
-    Expr   *assignexpr;
+    Expr *equalityexpr;
+    Expr *logandexpr;
+    Expr *logorexpr;
+    Expr *assignexpr;
     Expr *unaryexpr; 
     List<VarDecl*> *param;
     Identifier *identify;
     Operator *assignoper;
+    Operator *unaryoper;
 }
 
 
@@ -126,6 +127,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <logorexpr> LogOrExpr
 %type <assignexpr> AssignExpr
 %type <assignoper> AssignOper
+%type <assignoper> UnaryOper
 %%
 /* Rules
  * -----
@@ -187,11 +189,11 @@ Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
 PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | T_FloatConstant				  {$$ = new FloatConstant(@1,$1);}
 	  | T_BoolConstant			          {$$ = new BoolConstant(@1,$1);}
-          | Identifier					  {$$ = new LValue(@1);}
+          | Identifier					  {$$ = new FieldAccess(NULL, $1);}
 	  | '(' Expr ')'				  {$$ = $2;}
 	  ;
           
-Expr 	  : AssignExpr                                     { $$ =$1;}
+Expr 	  : AssignExpr                                    { $$ =$1;}
           ;
 
 MulExpr   : UnaryExpr	/*multiplicative*/		  { $$ = $1;}
@@ -226,7 +228,7 @@ LogOrExpr : LogAndExpr					  { $$ = $1;}
 	  ;
 
 AssignExpr: LogOrExpr    				  { $$ =$1;}
-	  | UnaryExpr AssignOper AssignExpr               {}
+	  | UnaryExpr AssignOper AssignExpr               { $$ = new AssignExpr($1, $2, $3); }
 	  ;
 
 AssignOper: '='                                           {$$= new Operator(@1, "=");}
@@ -236,21 +238,21 @@ AssignOper: '='                                           {$$= new Operator(@1, 
           | "-="                                          {$$= new Operator(@1, "-=");}
           ;
 
-PostExpr  : PriExpr					  {}
-	  | PostExpr "++" 				  {}
-	  | PostExpr "--" 				  {}
+PostExpr  : PriExpr					  {$$=$1;}
+	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
+	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
 /*DOT FIELD_SELECLTION*/
-          | PostExpr '.' T_FieldSelection			  {} 
+          | PostExpr '.' T_FieldSelection	          {$$ = new FieldAccess($1, $3);} 
 	  ;
           
-UnaryOper : '+'                                           {}
-          | '-'                                           {}
+UnaryOper : '+'                                           {$$= new Operator(@1, "+");}
+          | '-'                                           {$$= new Operator(@1, "-");}
           ;
           
-UnaryExpr : PostExpr					  {}
-	  | "++" UnaryExpr				  {}
-	  | "--" UnaryExpr				  {}
-	  | UnaryOper UnaryExpr				  {}
+UnaryExpr : PostExpr					  {$$=$1;}
+	  | "++" UnaryExpr				  {$$ = new CompoundExpr(new Operator(@1, "++"), $2);}
+	  | "--" UnaryExpr				  {$$ = new CompoundExpr(new Operator(@1, "--"), $2);}
+	  | UnaryOper UnaryExpr				  {$$ = new CompoundExpr($1, $2);}
 	  ;
 
 
