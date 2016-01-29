@@ -154,7 +154,7 @@ DeclList  :    DeclList Decl                              { ($$=$1)->Append($2);
           ;
 
 Decl      :    VarDecl ';'                                {$$ = $1;}
- 	  |    FnDecl                                     {$$ = $1;}
+ 	  |    FnDecl  ';'                                {$$ = $1;}
           ;
           
 VarDecl   :   Var           	                          { $$ = $1;}
