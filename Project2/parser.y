@@ -58,10 +58,11 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr  *equalityexpr;
     Expr  *logandexpr;
     Expr  *logorexpr;
-    AssignExpr   *assignexpr;
+    Expr   *assignexpr;
     Expr *unaryexpr; 
     List<VarDecl*> *param;
     Identifier *identify;
+    Operator *assignoper;
 }
 
 
@@ -124,6 +125,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <logandexpr> LogAndExpr
 %type <logorexpr> LogOrExpr
 %type <assignexpr> AssignExpr
+%type <assignoper> AssignOper
 %%
 /* Rules
  * -----
@@ -185,8 +187,8 @@ Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
 PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | T_FloatConstant				  {$$ = new FloatConstant(@1,$1);}
 	  | T_BoolConstant			          {$$ = new BoolConstant(@1,$1);}
-          | Identifier					  {}
-	  | '(' Expr ')'				  {}
+          | Identifier					  {$$ = new LValue(@1);}
+	  | '(' Expr ')'				  {$$ = $2;}
 	  ;
           
 Expr 	  : AssignExpr                                     { $$ =$1;}
@@ -215,33 +217,30 @@ EqualityExpr: RelationalExpr				  { $$ =$1;}
 	    | EqualityExpr "!=" RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
 	    ;
 
-LogAndExpr: EqualityExpr 				          {$$ = $1;}
-	  | LogAndExpr "&&" EqualityExpr  		  {}
+LogAndExpr: EqualityExpr 				  {$$ = $1;}
+	  | LogAndExpr "&&" EqualityExpr  		  {$$= new LogicalExpr( $1, new Operator(@2, "&&"), $3);}
 	  ;
 
-LogXOrExpr: LogAndExpr                                    {}
-          ;
-
-LogOrExpr : LogXOrExpr					  {}
-	  | LogOrExpr T_OrOp LogXOrExpr			  {}
+LogOrExpr : LogAndExpr					  { $$ = $1;}
+	  | LogOrExpr "||"  LogAndExpr			  {$$= new LogicalExpr( $1, new Operator(@2, "||"), $3);}
 	  ;
 
-AssignExpr: ConditionalExpr				  {}
+AssignExpr: LogOrExpr    				  { $$ =$1;}
 	  | UnaryExpr AssignOper AssignExpr               {}
 	  ;
 
-AssignOper: '='                                           {}
-          | "*="                                          {}
-          | "/="                                          {}
-          | "+="                                          {}
-          | "-="                                          {}
+AssignOper: '='                                           {$$= new Operator(@1, "=");}
+          | "*="                                          {$$= new Operator(@1, "*=");}
+          | "/="                                          {$$= new Operator(@1, "/=");}
+          | "+="                                          {$$= new Operator(@1, "+=");}
+          | "-="                                          {$$= new Operator(@1, "-=");}
           ;
 
 PostExpr  : PriExpr					  {}
 	  | PostExpr "++" 				  {}
 	  | PostExpr "--" 				  {}
 /*DOT FIELD_SELECLTION*/
-          | PostExpr '.' Identifier			  {} 
+          | PostExpr '.' T_FieldSelection			  {} 
 	  ;
           
 UnaryOper : '+'                                           {}
@@ -255,8 +254,6 @@ UnaryExpr : PostExpr					  {}
 	  ;
 
 
-ConditionalExpr : LogOrExpr                               {}
-                ;
 
 /*ConstantExpr : ConditionalExpr                          {}
              ;*/  /* EXTRA */
