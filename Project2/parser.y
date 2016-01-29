@@ -55,13 +55,17 @@ void yyerror(const char *msg); // standard error-handling routine
     ArithmeticExpr *mulexpr;
     ArithmeticExpr *addexpr;
     RelationalExpr *relativeexpr;
-    EqualityExpr  *equalityExpr;
+    EqualityExpr  *equalityexpr;
     LogicalExpr  *logandexpr;
     LogicalExpr  *logorexpr;
     AssignExpr   *assignexpr;
-    CompoundExpr *unaryExpr; 
+    CompoundExpr *unaryexpr; 
     List<VarDecl*> *param;
     Identifier *identify;
+    Stmt *stmt;
+    List<Stmt*> *stmtlist;
+    StmtBlock* stmtblock;
+    SwitchStmt* switchstmt;
 }
 
 
@@ -124,6 +128,10 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <logandexpr> LogAndExpr
 %type <logorexpr> LogOrExpr
 %type <assignexpr> AssignExpr
+%type <stmt> Stmt
+%type <stmtlist> StmtList
+%type <stmtblock> StmtBlock
+%type <switchstmt> SwitchStmt
 %%
 /* Rules
  * -----
@@ -141,18 +149,19 @@ Program   :    DeclList            {
                                       if (ReportError::NumErrors() == 0) 
                                           program->Print(0);
                                     }
+          | Stmt                    {}
           ;
 
 DeclList  :    DeclList Decl                              { ($$=$1)->Append($2); }
           |    Decl                                       { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    VarDecl ';'                                {$$ = $1;}
+Decl      :    VarDecl                                    {$$ = $1;}
  	  |    FnDecl                                     {$$ = $1;}
           ;
           
-VarDecl   :   Var           	                          { $$ = $1;}
-          |   Var '=' PriExpr                             {}
+VarDecl   :   Var ';'         	                          { $$ = $1;}
+          |   Var '=' PriExpr ';'                         {}
 	  ;
 
 Var       :  Type Identifier        			  {$$= new VarDecl($2,$1);}
@@ -192,7 +201,7 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 Expr 	  : AssignExpr {}
           ;
 
-MulExpr   : UnaryExpr	/*multiplicative*/		  {}
+MulExpr   : UnaryExpr			                  {} /*multiplicative*/
 	  | MulExpr '*' UnaryExpr			  {}
 	  | MulExpr '/' UnaryExpr                         {}
 	  ;
@@ -229,8 +238,7 @@ LogOrExpr : LogXOrExpr					  {}
 	  ;
 
 AssignExpr: ConditionalExpr				  {}
-	  | UnaryExpr AssignOper                          {}
-          /*| AssignExpr                                    {}*/       /*EXTRA IN RULE*/    
+	  | UnaryExpr AssignOper AssignExpr               {} 
 	  ;
 
 AssignOper: '='                                           {}
@@ -271,8 +279,31 @@ ConditionalExpr : LogOrExpr                               {}
 
 /*ConstantExpr : ConditionalExpr                          {}
              ;*/  /* EXTRA */
-             
 
+Stmt : SimpleStmt                                         {}
+     | StmtBlock                                          {}
+     ;
+     
+SimpleStmt : ExprStmt                                     {}
+           /*| Decl                                         {}*/
+           | SwitchStmt
+           ;
+
+StmtList : Stmt                                           {}
+         | StmtList Stmt                                  {}
+         ;
+         
+ExprStmt : ';'                                            {}
+         |  Expr ';'                                      {}
+         ;
+         
+StmtBlock : T_LeftBrace T_RightBrace                      {}
+          | T_LeftBrace StmtList T_RightBrace             {}
+          ;
+
+SwitchStmt: T_Switch T_LeftParen Expr T_RightParen T_LeftBrace {}
+          ;
+          
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
