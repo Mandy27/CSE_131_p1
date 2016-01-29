@@ -52,16 +52,6 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr *priexpr;
     Expr *expr;
     PostfixExpr *postexpr;  //cant declare PostExpr
-<<<<<<< HEAD
-    ArithmeticExpr *mulexpr;
-    ArithmeticExpr *addexpr;
-    RelationalExpr *relativeexpr;
-    EqualityExpr  *equalityexpr;
-    LogicalExpr  *logandexpr;
-    LogicalExpr  *logorexpr;
-    AssignExpr   *assignexpr;
-    CompoundExpr *unaryexpr; 
-=======
     Expr *mulexpr;
     Expr *addexpr;
     Expr *relativeexpr;
@@ -70,7 +60,6 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr  *logorexpr;
     AssignExpr   *assignexpr;
     Expr *unaryexpr; 
->>>>>>> 92fc1c832cc7c0feca93a18eb02718eeb5535521
     List<VarDecl*> *param;
     Identifier *identify;
     Stmt *stmt;
@@ -287,7 +276,7 @@ Stmt : SimpleStmt                                         {}
      
 SimpleStmt : ExprStmt                                     {}
            /*| Decl                                         {}*/
-           | SwitchStmt
+           | SwitchStmt                                   {}
            ;
 
 StmtList : Stmt                                           {}
