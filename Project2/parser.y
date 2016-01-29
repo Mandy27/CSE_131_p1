@@ -52,6 +52,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr *priexpr;
     Expr *expr;
     PostfixExpr *postexpr;  //cant declare PostExpr
+<<<<<<< HEAD
     ArithmeticExpr *mulexpr;
     ArithmeticExpr *addexpr;
     RelationalExpr *relativeexpr;
@@ -60,6 +61,16 @@ void yyerror(const char *msg); // standard error-handling routine
     LogicalExpr  *logorexpr;
     AssignExpr   *assignexpr;
     CompoundExpr *unaryexpr; 
+=======
+    Expr *mulexpr;
+    Expr *addexpr;
+    Expr *relativeexpr;
+    Expr  *equalityexpr;
+    Expr  *logandexpr;
+    Expr  *logorexpr;
+    AssignExpr   *assignexpr;
+    Expr *unaryexpr; 
+>>>>>>> 92fc1c832cc7c0feca93a18eb02718eeb5535521
     List<VarDecl*> *param;
     Identifier *identify;
     Stmt *stmt;
@@ -198,36 +209,34 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | '(' Expr ')'				  {}
 	  ;
           
-Expr 	  : AssignExpr {}
+Expr 	  : AssignExpr                                    { $$ =$1;}
           ;
 
-MulExpr   : UnaryExpr			                  {} /*multiplicative*/
-	  | MulExpr '*' UnaryExpr			  {}
-	  | MulExpr '/' UnaryExpr                         {}
+MulExpr   : UnaryExpr	/*multiplicative*/		  { $$ = $1;}
+	  | MulExpr '*' UnaryExpr			  { $$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
+	  | MulExpr '/' UnaryExpr                         { $$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
 	  ;
 
-AddExpr	  : MulExpr					  {}
-          | AddExpr '+' MulExpr 			  {}
-	  | AddExpr '-' MulExpr				  {}
+AddExpr	  : MulExpr					  { $$ = $1;}
+          | AddExpr '+' MulExpr 			  {$$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3);}
+	  | AddExpr '-' MulExpr				  {$$ = new ArithmeticExpr($1, new Operator(@2, "-"), $3);}
 	  ;
 
-ShiftExpr : AddExpr                                       {}
-          ;
 
-RelationalExpr: ShiftExpr				  {}
-              | RelationalExpr '<' ShiftExpr	          {}
-              | RelationalExpr '>' ShiftExpr		  {}
-              | RelationalExpr "<=" ShiftExpr             {}
-              | RelationalExpr ">=" ShiftExpr             {}
+RelationalExpr: AddExpr				          {$$ =$1;}
+              | RelationalExpr '<' AddExpr	          {$$ = new RelationalExpr($1, new Operator(@2, "<"), $3);}
+              | RelationalExpr '>' AddExpr		  {$$ = new RelationalExpr($1, new Operator(@2, ">"), $3);}
+              | RelationalExpr "<=" AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, "<="), $3);}
+              | RelationalExpr ">=" AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, ">="), $3);}
               ;
 
-EqualityExpr: RelationalExpr				  {}
-	    | EqualityExpr "==" RelationalExpr            {}
-            | EqualityExpr "!=" RelationalExpr            {}
+EqualityExpr: RelationalExpr				  { $$ =$1;}
+	    | EqualityExpr "==" RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "=="), $3);}
+	    | EqualityExpr "!=" RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
 	    ;
 
-LogAndExpr: InclusiveOrExpr				  {}
-	  | LogAndExpr "&&" InclusiveOrExpr 		  {}
+LogAndExpr: AddExpr				  {$$ = $1;}
+	  | LogAndExpr "&&" AddExpr 		  {}
 	  ;
 
 LogXOrExpr: LogAndExpr                                    {}
@@ -238,7 +247,7 @@ LogOrExpr : LogXOrExpr					  {}
 	  ;
 
 AssignExpr: ConditionalExpr				  {}
-	  | UnaryExpr AssignOper AssignExpr               {} 
+	  | UnaryExpr AssignOper AssignExpr               {}
 	  ;
 
 AssignOper: '='                                           {}
@@ -265,14 +274,6 @@ UnaryExpr : PostExpr					  {}
 	  | UnaryOper UnaryExpr				  {}
 	  ;
 
-AndExpr   : EqualityExpr                                  {}
-          ;
-
-ExclusiveOrExpr : AndExpr                                 {}
-                ;
-          
-InclusiveOrExpr : ExclusiveOrExpr                         {}
-                ;
 
 ConditionalExpr : LogOrExpr                               {}
                 ;
