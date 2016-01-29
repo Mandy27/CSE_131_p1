@@ -49,8 +49,8 @@ void yyerror(const char *msg); // standard error-handling routine
     VarDecl *vardecl;
     FnDecl *fndecl;
     Type *type;
+    Expr *priexpr;
     Expr *expr;
-    Expr *ex;
     PostfixExpr *postexpr;  //cant declare PostExpr
     ArithmeticExpr *mulexpr;
     ArithmeticExpr *addexpr;
@@ -62,7 +62,6 @@ void yyerror(const char *msg); // standard error-handling routine
     CompoundExpr *unaryExpr; 
     List<VarDecl*> *param;
     Identifier *identify;
-
 }
 
 
@@ -91,7 +90,7 @@ void yyerror(const char *msg); // standard error-handling routine
 
 %token   <identifier> T_Identifier
 %token   <integerConstant> T_IntConstant
-%token   <floatConstant> T_FloatConstant
+%token   <doubleConstant> T_FloatConstant
 %token   <boolConstant> T_BoolConstant
 
 
@@ -110,8 +109,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <decl>      Decl
 %type <vardecl>   VarDecl
 %type <type>  Type
-%type <expr>  Expr
-%type <ex> Ex
+%type <priexpr>  PriExpr
+%type <expr> Expr
 %type <postexpr> PostExpr
 %type <unaryexpr> UnaryExpr
 %type <fndecl> FnDecl
@@ -120,7 +119,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <identify> Identifier
 %type <mulexpr> MulExpr
 %type <addexpr> AddExpr
-%type <relativeexpr> RelativeExpr
+%type <relativeexpr> RelationalExpr
 %type <equalityexpr> EqualityExpr
 %type <logandexpr> LogAndExpr
 %type <logorexpr> LogOrExpr
@@ -144,37 +143,37 @@ Program   :    DeclList            {
                                     }
           ;
 
-DeclList  :    DeclList Decl        { ($$=$1)->Append($2); }
-          |    Decl                 { ($$ = new List<Decl*>)->Append($1); }
+DeclList  :    DeclList Decl                              { ($$=$1)->Append($2); }
+          |    Decl                                       { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    VarDecl ';'             {$$ = $1;}
- 	  |    FnDecl               {$$ = $1;}
+Decl      :    VarDecl ';'                                {$$ = $1;}
+ 	  |    FnDecl                                     {$$ = $1;}
           ;
           
-VarDecl   :   Var           	    { $$ = $1;}
-          |   Var '=' Expr          {}
+VarDecl   :   Var           	                          { $$ = $1;}
+          |   Var '=' PriExpr                             {}
 	  ;
 
-Var       :  Type Identifier        			 {$$= new VarDecl($2,$1);}
+Var       :  Type Identifier        			  {$$= new VarDecl($2,$1);}
           ;
 
 Identifier:  T_Identifier   	                          {$$=new Identifier(@1, $1);}
           ;
 
-Type      :  T_Int    			{ $$ = Type::intType;}  
-  	  |  T_Float			{ $$ = Type::floatType;}
-	  |  T_Bool  			{ $$ = Type::boolType;} 
-	  |  T_Vec2			{ $$ = Type::vec2Type;}
-	  |  T_Vec3			{ $$ = Type::vec3Type;}
-	  |  T_Vec4			{ $$ = Type::vec3Type;}
-	  |  T_Mat2			{ $$ = Type::mat2Type;}
-	  |  T_Mat3			{ $$ = Type::mat3Type;}
-	  |  T_Mat4			{ $$ = Type::mat4Type;}
+Type      :  T_Int    			                  { $$ = Type::intType;}      /*type_specifier_noarray*/
+  	  |  T_Float			                  { $$ = Type::floatType;}
+	  |  T_Bool  			                  { $$ = Type::boolType;} 
+	  |  T_Vec2			                  { $$ = Type::vec2Type;}
+	  |  T_Vec3			                  { $$ = Type::vec3Type;}
+	  |  T_Vec4			                  { $$ = Type::vec3Type;}
+	  |  T_Mat2			                  { $$ = Type::mat2Type;}
+	  |  T_Mat3			                  { $$ = Type::mat3Type;}
+	  |  T_Mat4			                  { $$ = Type::mat4Type;}
           ;
 
-FnDecl	  :  Type Identifier '(' Param ')'               { $$ = new FnDecl($2, $1, $4);} 
-  	  |  T_Void Identifier '(' Param ')'             { $$ = new FnDecl($2, Type::voidType, $4);} 
+FnDecl	  :  Type Identifier '(' Param ')'                { $$ = new FnDecl($2, $1, $4);} 
+  	  |  T_Void Identifier '(' Param ')'              { $$ = new FnDecl($2, Type::voidType, $4);} 
 	  ;
 
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
@@ -183,68 +182,97 @@ Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
 	  |						  {$$ = new List<VarDecl*>;}                             
 	  ;
 
-Expr 	  : T_IntConstant				  {}
-	  | T_FloatConstant				  {}
-	  | T_BoolConstant			          {}
+PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
+	  | T_FloatConstant				  {$$ = new FloatConstant(@1,$1);}
+	  | T_BoolConstant			          {$$ = new BoolConstant(@1,$1);}
           | Identifier					  {}
-	  | '(' Ex ')'				  {}
+	  | '(' Expr ')'				  {}
 	  ;
-Ex 	  : AssignExpr {}
-;
+          
+Expr 	  : AssignExpr {}
+          ;
 
 MulExpr   : UnaryExpr	/*multiplicative*/		  {}
-	  | MulExpr '*' UnaryExpr					{}
-	  | MulExpr '/' UnaryExpr
+	  | MulExpr '*' UnaryExpr			  {}
+	  | MulExpr '/' UnaryExpr                         {}
 	  ;
 
-AddExpr	  : MulExpr					{}
-          | AddExpr '+' MulExpr 				  {}
+AddExpr	  : MulExpr					  {}
+          | AddExpr '+' MulExpr 			  {}
 	  | AddExpr '-' MulExpr				  {}
 	  ;
 
-RelativeExpr: AddExpr					{}
-	    | RelativeExpr '<' AddExpr				{}
-	    | RelativeExpr '>' AddExpr				{}
-	    | RelativeExpr "<=" AddExpr                               {}
-            | RelativeExpr ">=" AddExpr                               {}
+ShiftExpr : AddExpr                                       {}
+          ;
+
+RelationalExpr: ShiftExpr				  {}
+              | RelationalExpr '<' ShiftExpr	          {}
+              | RelationalExpr '>' ShiftExpr		  {}
+              | RelationalExpr "<=" ShiftExpr             {}
+              | RelationalExpr ">=" ShiftExpr             {}
+              ;
+
+EqualityExpr: RelationalExpr				  {}
+	    | EqualityExpr "==" RelationalExpr            {}
+            | EqualityExpr "!=" RelationalExpr            {}
 	    ;
 
-EqualityExpr: RelativeExpr				{}
-	    | EqualityExpr "==" RelativeExpr                               {}
-            | EqualityExpr "!=" RelativeExpr                               {}
-	    ;
-
-LogAndExpr: EqualityExpr				{}
-	  | LogAndExpr T_AndOp EqualityExpr 		{}
+LogAndExpr: InclusiveOrExpr				  {}
+	  | LogAndExpr "&&" InclusiveOrExpr 		  {}
 	  ;
 
-LogOrExpr : LogAndExpr					{}
-	  | LogOrExpr T_OrOp LogAndExpr			{}
+LogXOrExpr: LogAndExpr                                    {}
+          ;
+
+LogOrExpr : LogXOrExpr					  {}
+	  | LogOrExpr T_OrOp LogXOrExpr			  {}
 	  ;
 
-
-
-AssignExpr: LogOrExpr					{}
-	  | UnaryExpr '='  AssignExpr			{}
-	  | UnaryExpr "*="  AssignExpr			{}
-	  | UnaryExpr "/="  AssignExpr			{}
-	  | UnaryExpr "+="  AssignExpr			{}
-	  | UnaryExpr "-="  AssignExpr			{}
+AssignExpr: ConditionalExpr				  {}
+	  | UnaryExpr AssignOper                          {}
+          /*| AssignExpr                                    {}*/       /*EXTRA IN RULE*/    
 	  ;
 
-PostExpr  : Expr					  {}
-	  | PostExpr "++" 					{}
-	  | PostExpr "--" 					{}
+AssignOper: '='                                           {}
+          | "*="                                          {}
+          | "/="                                          {}
+          | "+="                                          {}
+          | "-="                                          {}
+          ;
+
+PostExpr  : PriExpr					  {}
+	  | PostExpr "++" 				  {}
+	  | PostExpr "--" 				  {}
 /*DOT FIELD_SELECLTION*/
-          | PostExpr '.' Identifier			{} 
+          | PostExpr '.' Identifier			  {} 
+	  ;
+          
+UnaryOper : '+'                                           {}
+          | '-'                                           {}
+          ;
+          
+UnaryExpr : PostExpr					  {}
+	  | "++" UnaryExpr				  {}
+	  | "--" UnaryExpr				  {}
+	  | UnaryOper UnaryExpr				  {}
 	  ;
 
-UnaryExpr : PostExpr					{}
-	  | "++" UnaryExpr				{}
-	  | "--" UnaryExpr				{}
-	  | '+' UnaryExpr				{}
-	  | '-' UnaryExpr				{}
-	  ;
+AndExpr   : EqualityExpr                                  {}
+          ;
+
+ExclusiveOrExpr : AndExpr                                 {}
+                ;
+          
+InclusiveOrExpr : ExclusiveOrExpr                         {}
+                ;
+
+ConditionalExpr : LogOrExpr                               {}
+                ;
+
+/*ConstantExpr : ConditionalExpr                          {}
+             ;*/  /* EXTRA */
+             
+
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
