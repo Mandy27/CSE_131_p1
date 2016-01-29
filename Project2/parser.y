@@ -189,7 +189,7 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | '(' Expr ')'				  {}
 	  ;
           
-Expr 	  : AssignExpr                                    { $$ =$1;}
+Expr 	  : AssignExpr                                     { $$ =$1;}
           ;
 
 MulExpr   : UnaryExpr	/*multiplicative*/		  { $$ = $1;}
@@ -215,8 +215,8 @@ EqualityExpr: RelationalExpr				  { $$ =$1;}
 	    | EqualityExpr "!=" RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
 	    ;
 
-LogAndExpr: AddExpr				  {$$ = $1;}
-	  | LogAndExpr "&&" AddExpr 		  {}
+LogAndExpr: InclusiveOrExpr				          {$$ = $1;}
+	  | LogAndExpr "&&" InclusiveOrExpr 		  {}
 	  ;
 
 LogXOrExpr: LogAndExpr                                    {}
@@ -254,6 +254,14 @@ UnaryExpr : PostExpr					  {}
 	  | UnaryOper UnaryExpr				  {}
 	  ;
 
+AndExpr   : EqualityExpr                                  {}
+          ;
+
+ExclusiveOrExpr : AndExpr                                 {}
+                ;
+          
+InclusiveOrExpr : ExclusiveOrExpr                         {}
+                ;
 
 ConditionalExpr : LogOrExpr                               {}
                 ;
