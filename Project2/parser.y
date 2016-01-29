@@ -130,10 +130,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <logorexpr> LogOrExpr
 %type <assignexpr> AssignExpr
 %type <assignoper> AssignOper
-%type <stmt> Stmt
-%type <stmtlist> StmtList
-%type <stmtblock> StmtBlock
-%type <switchstmt> SwitchStmt
 %%
 /* Rules
  * -----
@@ -263,30 +259,7 @@ UnaryExpr : PostExpr					  {}
 
 
 /*ConstantExpr : ConditionalExpr                          {}
-             ;*/  /* EXTRA */
-Stmt : SimpleStmt                                         {}
-     | StmtBlock                                          {}
-     ;
-     
-SimpleStmt : ExprStmt                                     {}
-           /*| Decl                                         {}*/
-           | SwitchStmt                                   {}
-           ;
-
-StmtList : Stmt                                           {}
-         | StmtList Stmt                                  {}
-         ;
-         
-ExprStmt : ';'                                            {}
-         |  Expr ';'                                      {}
-         ;
-         
-StmtBlock : T_LeftBrace T_RightBrace                      {}
-          | T_LeftBrace StmtList T_RightBrace             {}
-          ;
-
-SwitchStmt: T_Switch T_LeftParen Expr T_RightParen T_LeftBrace {}
-          ;            
+             ;*/  /* EXTRA */        
 
 %%
 
