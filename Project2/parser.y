@@ -152,7 +152,7 @@ DeclList  :    DeclList Decl                              { ($$=$1)->Append($2);
           ;
 
 Decl      :    VarDecl ';'                                {$$ = $1;}
- 	  |    FnDecl                                     {$$ = $1;}
+ 	  |    FnDecl  ';'                                {$$ = $1;}
           ;
           
 VarDecl   :   Var           	                          { $$ = $1;}
@@ -242,23 +242,23 @@ PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
 /*DOT FIELD_SELECLTION*/
-          | PostExpr '.' T_FieldSelection	          {$$ = new FieldAccess($1, $3);} 
+          | PostExpr '.' Identifier	          {$$ = new FieldAccess($1, $3);} 
 	  ;
           
 UnaryOper : '+'                                           {$$= new Operator(@1, "+");}
           | '-'                                           {$$= new Operator(@1, "-");}
           ;
           
-UnaryExpr : PostExpr					  {$$=$1;}
-	  | "++" UnaryExpr				  {$$ = new CompoundExpr(new Operator(@1, "++"), $2);}
-	  | "--" UnaryExpr				  {$$ = new CompoundExpr(new Operator(@1, "--"), $2);}
-	  | UnaryOper UnaryExpr				  {$$ = new CompoundExpr($1, $2);}
+UnaryExpr : PostExpr					  {$$ = $1;}
+	  | "++" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "++"));}
+	  | "--" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "--"));}
+	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
 	  ;
 
 
 
-/*ConstantExpr : ConditionalExpr                          {}
-             ;*/  /* EXTRA */
+ConstantExpr : LogOrExpr                                  {}
+             ;
              
 
 %%
