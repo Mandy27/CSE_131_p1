@@ -64,6 +64,9 @@ void yyerror(const char *msg); // standard error-handling routine
     Identifier *identify;
     Operator *assignoper;
     Operator *unaryoper;
+    Stmt *stmt;
+    List<Stmt*> *stmtlist;
+    StmtBlock* stmtblock;
 }
 
 
@@ -128,6 +131,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <assignexpr> AssignExpr
 %type <assignoper> AssignOper
 %type <assignoper> UnaryOper
+%type <stmt> Stmt
+%type <stmtlist> StmtList
+%type <stmtblock> StmtBlock
 %%
 /* Rules
  * -----
@@ -242,7 +248,7 @@ PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
 /*DOT FIELD_SELECLTION*/
-          | PostExpr '.' T_FieldSelection	          {$$ = new FieldAccess($1, $3);} 
+          | PostExpr '.' T_FieldSelection	          {/*$$ = new FieldAccess($1, $3);*/} 
 	  ;
           
 UnaryOper : '+'                                           {$$= new Operator(@1, "+");}
@@ -255,12 +261,27 @@ UnaryExpr : PostExpr					  {$$=$1;}
 	  | UnaryOper UnaryExpr				  {$$ = new CompoundExpr($1, $2);}
 	  ;
 
-
-
 /*ConstantExpr : ConditionalExpr                          {}
              ;*/  /* EXTRA */
              
+StmtList : Stmt                                           {}
+         | StmtList Stmt                                  {}
+         ;
+         
+Stmt : SimpleStmt                                         {}
+     | StmtBlock                                          {}
+     ;
 
+SimpleStmt : ExprStmt                                     {}
+           ;
+
+ExprStmt : ';'                                            {}
+         |  Expr ';'                                      {}
+         ;
+
+StmtBlock : T_LeftBrace T_RightBrace                      {}
+          | T_LeftBrace StmtList T_RightBrace             {}
+          ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
