@@ -48,7 +48,6 @@ void yyerror(const char *msg); // standard error-handling routine
     List<Decl*> *declList;
     VarDecl *vardecl;
     FnDecl *fndecl;
-    FnDecl *fndef;
     Type *type;
     Expr *priexpr;
     Expr *expr;
@@ -69,6 +68,7 @@ void yyerror(const char *msg); // standard error-handling routine
     List<Stmt*> *stmtlist;
     StmtBlock* stmtblock;
     SwitchStmt *switchstmt;
+    Stmt* compoundstmt;
 }
 
 
@@ -121,7 +121,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <postexpr> PostExpr
 %type <unaryexpr> UnaryExpr
 %type <fndecl> FnDecl
-%type <fndef> FnDef
 %type <param>  Param
 %type <vardecl>    Var
 %type <identify> Identifier
@@ -138,6 +137,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmtlist> StmtList
 %type <stmtblock> StmtBlock
 %type <switchstmt> SwitchStmt
+%type <compoundstmt> CompoundStmt
 %%
 /* Rules
  * -----
@@ -186,12 +186,10 @@ Type      :  T_Int    			                  { $$ = Type::intType;}      /*type_sp
 	  |  T_Mat4			                  { $$ = Type::mat4Type;}
           ;
 
-FnDecl	  :  Type Identifier '(' Param ')'                { $$ = new FnDecl($2, $1, $4);} 
-  	  |  T_Void Identifier '(' Param ')'              { $$ = new FnDecl($2, Type::voidType, $4);} 
+FnDecl	  :  Type Identifier '(' Param ')' CompoundStmt               { $$ = new FnDecl($2, $1, $4); $$->SetFunctionBody($6);} 
+  	  |  T_Void Identifier '(' Param ')' CompoundStmt              { $$ = new FnDecl($2, Type::voidType, $4);$$->SetFunctionBody($6);} 
 	  ;
 
-FnDef    : FnDecl CompoundStmt        		  {}
-          ;
 	   
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
  	  | Var          				  {($$ = new List<VarDecl*>)->Append($1);}
@@ -268,7 +266,13 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 	  ;
 
 SimpleStmt : ExprStmt                             {}
-          | SwitchStmt                              {}
+           | SwitchStmt                              {}
+   	   | Decl
+	   /*
+selection_statement
+case_label
+iteration_statement
+*/
            ;
            
 Stmt : SimpleStmt                                         {}
