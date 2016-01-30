@@ -67,6 +67,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Stmt *stmt;
     List<Stmt*> *stmtlist;
     StmtBlock* stmtblock;
+    SwitchStmt *switchstmt;
 }
 
 
@@ -134,6 +135,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmt> Stmt
 %type <stmtlist> StmtList
 %type <stmtblock> StmtBlock
+%type <switchstmt> SwitchStmt
 %%
 /* Rules
  * -----
@@ -247,41 +249,51 @@ AssignOper: '='                                           {$$= new Operator(@1, 
 PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
-/*DOT FIELD_SELECLTION*/
-          | PostExpr '.' T_FieldSelection	          {/*$$ = new FieldAccess($1, $3);*/} 
+          | PostExpr '.' Identifier	          {$$ = new FieldAccess($1, $3);} 
 	  ;
           
 UnaryOper : '+'                                           {$$= new Operator(@1, "+");}
           | '-'                                           {$$= new Operator(@1, "-");}
           ;
           
-UnaryExpr : PostExpr					  {$$=$1;}
-	  | "++" UnaryExpr				  {$$ = new CompoundExpr(new Operator(@1, "++"), $2);}
-	  | "--" UnaryExpr				  {$$ = new CompoundExpr(new Operator(@1, "--"), $2);}
-	  | UnaryOper UnaryExpr				  {$$ = new CompoundExpr($1, $2);}
+UnaryExpr : PostExpr					  {$$ = $1;}
+	  | "++" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "++"));}
+	  | "--" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "--"));}
+	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
 	  ;
 
-/*ConstantExpr : ConditionalExpr                          {}
-             ;*/  /* EXTRA */
-             
+/*ConstantExpr : LogOrExpr                                  {}
+             ;*/
+
+SimpleStmt : ExprStmt                             {}
+          | SwitchStmt                              {}
+           ;
+           
+Stmt : SimpleStmt                                         {}
+     | CompoundStmt                                       {}
+     ;
+
 StmtList : Stmt                                           {}
          | StmtList Stmt                                  {}
          ;
          
-Stmt : SimpleStmt                                         {}
-     | StmtBlock                                          {}
-     ;
+SwitchStmtList: StmtList                                  {}
+              ;
 
-SimpleStmt : ExprStmt                                     {}
-           ;
+SwitchStmt: T_Switch '(' Expr ')' '{' SwitchStmtList '}'  {}
+          ;
 
+CompoundStmt : '{' '}'                      {}
+             | '{' StmtList '}'            {}
+             ;
+             
+StmtBlock : CompoundStmt                                   {}
+          | SimpleStmt                                     {}
+          ;
+          
 ExprStmt : ';'                                            {}
          |  Expr ';'                                      {}
          ;
-
-StmtBlock : T_LeftBrace T_RightBrace                      {}
-          | T_LeftBrace StmtList T_RightBrace             {}
-          ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
