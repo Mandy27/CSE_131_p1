@@ -48,6 +48,7 @@ void yyerror(const char *msg); // standard error-handling routine
     List<Decl*> *declList;
     VarDecl *vardecl;
     FnDecl *fndecl;
+    FnDecl *fundef;
     Type *type;
     Expr *priexpr;
     Expr *expr;
@@ -116,6 +117,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <postexpr> PostExpr
 %type <unaryexpr> UnaryExpr
 %type <fndecl> FnDecl
+%type <fundef> FunDef
 %type <param>  Param
 %type <vardecl>    Var
 %type <identify> Identifier
@@ -257,8 +259,8 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 
 
 
-ConstantExpr : LogOrExpr                                  {}
-             ;
+/*ConstantExpr : LogOrExpr                                  {}
+             ;*/
              
 
 %%
