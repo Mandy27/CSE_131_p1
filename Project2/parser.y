@@ -66,7 +66,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Operator *unaryoper;
     Stmt *stmt;
     List<Stmt*> *stmtlist;
-    StmtBlock* stmtblock;
+    //StmtBlock* stmtblock;
     SwitchStmt *switchstmt;
     Stmt* compoundstmt;
 }
@@ -135,7 +135,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <assignoper> UnaryOper
 %type <stmt> Stmt
 %type <stmtlist> StmtList
-%type <stmtblock> StmtBlock
+//%type <stmtblock> StmtBlock
 %type <switchstmt> SwitchStmt
 %type <compoundstmt> CompoundStmt
 %%
@@ -189,7 +189,6 @@ Type      :  T_Int    			                  { $$ = Type::intType;}      /*type_sp
 FnDecl	  :  Type Identifier '(' Param ')' CompoundStmt               { $$ = new FnDecl($2, $1, $4); $$->SetFunctionBody($6);} 
   	  |  T_Void Identifier '(' Param ')' CompoundStmt              { $$ = new FnDecl($2, Type::voidType, $4);$$->SetFunctionBody($6);} 
 	  ;
-
 	   
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
  	  | Var          				  {($$ = new List<VarDecl*>)->Append($1);}
@@ -267,12 +266,19 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 
 SimpleStmt : ExprStmt                             {}
            | SwitchStmt                              {}
+<<<<<<< HEAD
    	   | Decl
 	   /*
 selection_statement
 case_label
 iteration_statement
 */
+=======
+           | Decl                                  {}
+           | CaseLabel                             {}
+           | SelectionStmt                                {}
+           | IterationStmt                                {}
+>>>>>>> b0505606579d659d02ef651f87fdddebd668bf26
            ;
            
 Stmt : SimpleStmt                                         {}
@@ -284,6 +290,7 @@ StmtList : Stmt                                           {}
          ;
          
 SwitchStmtList: StmtList                                  {}
+              /* NOTHING */
               ;
 
 SwitchStmt: T_Switch '(' Expr ')' '{' SwitchStmtList '}'  {}
@@ -300,6 +307,37 @@ StmtBlock : CompoundStmt                                   {}
 ExprStmt : ';'                                            {}
          |  Expr ';'                                      {}
          ;
+         
+CaseLabel: T_Case Expr ':'                                {}
+         | T_Default ':'                                  {}
+         ;
+         
+SelectionStmt : T_If '(' Expr ')' SelectionRestStmt                         {}
+              ;
+              
+SelectionRestStmt : StmtBlock T_Else StmtBlock          {}
+                  | StmtBlock                            {}
+                  ;
+                  
+IterationStmt: T_While '(' Condition ')' StmtBlock  {}
+             | T_For '(' ForInitStmt ForRestStmt ')' StmtBlock  {}
+             ;
+             
+ForInitStmt: ExprStmt                                     {}
+           | Decl                             {}
+           ;
+           
+ForRestStmt: ConditionOpt ';'                             {}
+           | ConditionOpt ';' Expr                        {}
+           ;
+
+ConditionOpt: Condition                                   {}
+            /* EMPTY */
+            ;           
+
+Condition : Expr                                          {}
+          | Type Identifier T_Equal AssignExpr           {}
+          ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
