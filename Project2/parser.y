@@ -65,6 +65,10 @@ void yyerror(const char *msg); // standard error-handling routine
     Identifier *identify;
     Operator *assignoper;
     Operator *unaryoper;
+    Stmt *stmt;
+    List<Stmt*> *stmtlist;
+    StmtBlock* stmtblock;
+    SwitchStmt *switchstmt;
 }
 
 
@@ -130,6 +134,10 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <assignexpr> AssignExpr
 %type <assignoper> AssignOper
 %type <assignoper> UnaryOper
+%type <stmt> Stmt
+%type <stmtlist> StmtList
+%type <stmtblock> StmtBlock
+%type <switchstmt> SwitchStmt
 %%
 /* Rules
  * -----
@@ -243,7 +251,6 @@ AssignOper: '='                                           {$$= new Operator(@1, 
 PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
-/*DOT FIELD_SELECLTION*/
           | PostExpr '.' Identifier	          {$$ = new FieldAccess($1, $3);} 
 	  ;
           
@@ -257,12 +264,38 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
 	  ;
 
-
-
 /*ConstantExpr : LogOrExpr                                  {}
              ;*/
-             
 
+SimpleStmt : ExprStmt                             {}
+          | SwitchStmt                              {}
+           ;
+           
+Stmt : SimpleStmt                                         {}
+     | CompoundStmt                                       {}
+     ;
+
+StmtList : Stmt                                           {}
+         | StmtList Stmt                                  {}
+         ;
+         
+SwitchStmtList: StmtList                                  {}
+              ;
+
+SwitchStmt: T_Switch '(' Expr ')' '{' SwitchStmtList '}'  {}
+          ;
+
+CompoundStmt : '{' '}'                      {}
+             | '{' StmtList '}'            {}
+             ;
+             
+StmtBlock : CompoundStmt                                   {}
+          | SimpleStmt                                     {}
+          ;
+          
+ExprStmt : ';'                                            {}
+         |  Expr ';'                                      {}
+         ;
 %%
 
 /* The closing %% above marks the end of the Rules section and the beginning
