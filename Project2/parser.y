@@ -48,7 +48,7 @@ void yyerror(const char *msg); // standard error-handling routine
     List<Decl*> *declList;
     VarDecl *vardecl;
     FnDecl *fndecl;
-    FnDecl *fundef;
+    FnDecl *fndef;
     Type *type;
     Expr *priexpr;
     Expr *expr;
@@ -121,7 +121,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <postexpr> PostExpr
 %type <unaryexpr> UnaryExpr
 %type <fndecl> FnDecl
-%type <fundef> FunDef
+%type <fndef> FnDef
 %type <param>  Param
 %type <vardecl>    Var
 %type <identify> Identifier
@@ -190,6 +190,9 @@ FnDecl	  :  Type Identifier '(' Param ')'                { $$ = new FnDecl($2, $
   	  |  T_Void Identifier '(' Param ')'              { $$ = new FnDecl($2, Type::voidType, $4);} 
 	  ;
 
+FnDef    : FnDecl CompoundStmt        		  {}
+          ;
+	   
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
  	  | Var          				  {($$ = new List<VarDecl*>)->Append($1);}
 /*no param*/
@@ -263,9 +266,6 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 	  | "--" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "--"));}
 	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
 	  ;
-
-/*ConstantExpr : LogOrExpr                                  {}
-             ;*/
 
 SimpleStmt : ExprStmt                             {}
           | SwitchStmt                              {}
