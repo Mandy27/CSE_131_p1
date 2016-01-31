@@ -283,8 +283,9 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
            | SwitchStmt                                   { $$=$1;}
-           | Decl                                         { }
+           /*| Decl                                         { }
            | CaseLabel                                    { $$= $1;}
+	   */
            | SelectionStmt                                {$$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
