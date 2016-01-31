@@ -67,7 +67,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Stmt *stmt;
     Stmt *simplestmt;
     List<Stmt*> *stmtlist;
-    //StmtBlock* stmtblock;
+    StmtBlock* stmtblock;
     IfStmt* selectionstmt;
     SwitchStmt *switchstmt;
     Stmt* compoundstmt;
@@ -142,12 +142,12 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmt> Stmt
 %type <simplestmt> SimpleStmt
 %type <stmtlist> StmtList
-//%type <stmtblock> StmtBlock
-//%type <switchstmt> SwitchStmt
+%type <stmtblock> StmtBlock
+%type <switchstmt> SwitchStmt
 %type <compoundstmt> CompoundStmt
 %type <selectionstmt> SelectionStmt
 %type <exprstmt> ExprStmt  
-//%type <caselabel> CaseLabel
+%type <caselabel> CaseLabel
 %type <iterationstmt> IterationStmt
 %type <SwitchStmtList> SwitchStmtList
 %%
@@ -277,11 +277,9 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 	  ;
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
-           /*| SwitchStmt                                   { $$=$1;}
-   /*        | Decl                                         { $$=$1;}
-   */
-           /*| CaseLabel                                    { $$= $1;}
-	   */
+           | SwitchStmt                                   { $$=$1;}
+           /*| Decl                                         { $$=$1;}
+           | CaseLabel                                    { $$= $1;}*/
            | SelectionStmt                                {$$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
@@ -299,20 +297,20 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 	      |						  {$$ = new List<Stmt*>;}
               ;
 
-/*SwitchStmt: T_Switch '(' Expr ')' '{' CaseList Default '}'  {}
+SwitchStmt: T_Switch '(' Expr ')' '{' CaseList Default '}'  {}
           ;
-*/
-/*CaseList : CaseLabel      {}
+
+CaseList : CaseLabel      {}
 	 | CaseList CaseLabel {}
 	 ;
-*/
-/*CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
+
+CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
          ;
-*/
-/*Default  : T_Default ':' SwitchStmtList                      {}
+
+Default  : T_Default ':' SwitchStmtList                      {}
 	 |                                                   {}
  	 ;
-*/
+
 CompoundStmt : '{' '}'                      {}
              | '{' StmtList '}'            {}
              ;
