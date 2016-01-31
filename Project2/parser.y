@@ -75,7 +75,6 @@ void yyerror(const char *msg); // standard error-handling routine
     Case * caselabel;
     WhileStmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
-    Default *defaultlabel;
 }
 
 
@@ -155,7 +154,6 @@ void yyerror(const char *msg); // standard error-handling routine
 
 %nonassoc "No_Else"
 %nonassoc T_Else
-
 %%
 /* Rules
  * -----
@@ -303,7 +301,7 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 	      |						  {$$ = new List<Stmt*>;}
               ;
 
-SwitchStmt: T_Switch '(' Expr ')' '{' CaseList DefaultLabel '}'  {}
+SwitchStmt: T_Switch '(' Expr ')' '{' CaseList Default '}'  {}
           ;
 
 CaseList : CaseLabel      {}
@@ -313,7 +311,7 @@ CaseList : CaseLabel      {}
 CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
          ;
 
-DefaultLabel  : T_Default ':' SwitchStmtList                      {}
+Default  : T_Default ':' SwitchStmtList                      {}
 	 |                                                   {}
  	 ;
 
