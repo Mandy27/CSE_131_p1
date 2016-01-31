@@ -1,0 +1,20 @@
+
+   Program: 
+  5   FnDecl: 
+         (return type) Type: void
+  5      Identifier: foo
+         (body) StmtBlock: 
+  6         VarDecl: 
+               Type: int
+  6            Identifier: i
+  7         VarDecl: 
+               Type: int
+  7            Identifier: i2
+  9         PostfixExpr: 
+  9            FieldAccess: 
+  9               Identifier: i
+  9            Operator: ++
+ 10         PostfixExpr: 
+ 10            FieldAccess: 
+ 10               Identifier: i
+ 10            Operator: --

@@ -1,0 +1,32 @@
+
+   Program: 
+  5   FnDecl: 
+         (return type) Type: void
+  5      Identifier: foo
+         (body) StmtBlock: 
+  6         VarDecl: 
+               Type: int
+  6            Identifier: i
+            SwitchStmt: 
+  8            FieldAccess: 
+  8               Identifier: i
+               Case: 
+  9               IntConstant: 1
+ 10               AssignExpr: 
+ 10                  FieldAccess: 
+ 10                     Identifier: i
+ 10                  Operator: =
+ 10                  IntConstant: 2
+               Case: 
+ 11               IntConstant: 2
+ 12               AssignExpr: 
+ 12                  FieldAccess: 
+ 12                     Identifier: i
+ 12                  Operator: =
+ 12                  IntConstant: 1
+               Default: 
+ 14               AssignExpr: 
+ 14                  FieldAccess: 
+ 14                     Identifier: i
+ 14                  Operator: =
+ 14                  IntConstant: 1

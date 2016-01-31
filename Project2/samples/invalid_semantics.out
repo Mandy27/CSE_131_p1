@@ -1,0 +1,23 @@
+
+   Program: 
+  5   VarDecl: 
+         Type: int
+  5      Identifier: i
+  7   FnDecl: 
+         (return type) Type: float
+  7      Identifier: binky
+         (body) StmtBlock: 
+  9         VarDecl: 
+               Type: bool
+  9            Identifier: b
+            IfStmt: 
+ 10            (test) ArithmeticExpr: 
+ 10               FloatConstant: 1.5
+ 10               Operator: *
+ 10               BoolConstant: true
+               (then) StmtBlock: 
+ 11               ArithmeticExpr: 
+ 11                  FieldAccess: 
+ 11                     Identifier: b
+ 11                  Operator: +
+ 11                  IntConstant: 4

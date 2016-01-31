@@ -1,0 +1,16 @@
+
+   Program: 
+  3   VarDecl: 
+         Type: vec2
+  3      Identifier: myVar
+  5   FnDecl: 
+         (return type) Type: void
+  5      Identifier: main
+         (body) StmtBlock: 
+  9   FnDecl: 
+         (return type) Type: float
+  9      Identifier: foo
+         (body) StmtBlock: 
+ 11   VarDecl: 
+         Type: mat2
+ 11      Identifier: myMatrix

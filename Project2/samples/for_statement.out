@@ -1,0 +1,67 @@
+
+   Program: 
+  5   FnDecl: 
+         (return type) Type: void
+  5      Identifier: foo
+         (body) StmtBlock: 
+  6         VarDecl: 
+               Type: bool
+  6            Identifier: b
+  7         VarDecl: 
+               Type: int
+  7            Identifier: i
+  9         AssignExpr: 
+  9            FieldAccess: 
+  9               Identifier: b
+  9            Operator: =
+  9            BoolConstant: true
+ 10         AssignExpr: 
+ 10            FieldAccess: 
+ 10               Identifier: i
+ 10            Operator: =
+ 10            IntConstant: 0
+            ForStmt: 
+ 12            (init) AssignExpr: 
+ 12               FieldAccess: 
+ 12                  Identifier: i
+ 12               Operator: =
+ 12               IntConstant: 1
+ 12            (test) EqualityExpr: 
+ 12               FieldAccess: 
+ 12                  Identifier: b
+ 12               Operator: !=
+ 12               BoolConstant: true
+ 12            (step) PostfixExpr: 
+ 12               FieldAccess: 
+ 12                  Identifier: i
+ 12               Operator: ++
+ 13            (body) AssignExpr: 
+ 13               FieldAccess: 
+ 13                  Identifier: b
+ 13               Operator: =
+ 13               BoolConstant: false
+            ForStmt: 
+ 15            (init) AssignExpr: 
+ 15               FieldAccess: 
+ 15                  Identifier: i
+ 15               Operator: =
+ 15               IntConstant: 1
+ 15            (test) EqualityExpr: 
+ 15               FieldAccess: 
+ 15                  Identifier: b
+ 15               Operator: !=
+ 15               BoolConstant: true
+ 15            (step) PostfixExpr: 
+ 15               FieldAccess: 
+ 15                  Identifier: i
+ 15               Operator: ++
+               (body) StmtBlock: 
+ 16               AssignExpr: 
+ 16                  FieldAccess: 
+ 16                     Identifier: b
+ 16                  Operator: =
+ 16                  BoolConstant: false
+ 17               PostfixExpr: 
+ 17                  FieldAccess: 
+ 17                     Identifier: i
+ 17                  Operator: ++

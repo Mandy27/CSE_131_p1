@@ -1,0 +1,56 @@
+
+   Program: 
+  5   FnDecl: 
+         (return type) Type: void
+  5      Identifier: foo
+         (body) StmtBlock: 
+  6         VarDecl: 
+               Type: int
+  6            Identifier: i
+  7         VarDecl: 
+               Type: int
+  7            Identifier: i2
+  9         AssignExpr: 
+  9            FieldAccess: 
+  9               Identifier: i
+  9            Operator: *=
+  9            IntConstant: 2
+ 10         AssignExpr: 
+ 10            FieldAccess: 
+ 10               Identifier: i
+ 10            Operator: *=
+ 10            FieldAccess: 
+ 10               Identifier: i2
+ 12         AssignExpr: 
+ 12            FieldAccess: 
+ 12               Identifier: i
+ 12            Operator: /=
+ 12            IntConstant: 3
+ 13         AssignExpr: 
+ 13            FieldAccess: 
+ 13               Identifier: i
+ 13            Operator: /=
+ 13            FieldAccess: 
+ 13               Identifier: i2
+ 15         AssignExpr: 
+ 15            FieldAccess: 
+ 15               Identifier: i
+ 15            Operator: +=
+ 15            IntConstant: 1
+ 16         AssignExpr: 
+ 16            FieldAccess: 
+ 16               Identifier: i
+ 16            Operator: +=
+ 16            FieldAccess: 
+ 16               Identifier: i2
+ 18         AssignExpr: 
+ 18            FieldAccess: 
+ 18               Identifier: i
+ 18            Operator: -=
+ 18            IntConstant: 1
+ 19         AssignExpr: 
+ 19            FieldAccess: 
+ 19               Identifier: i
+ 19            Operator: -=
+ 19            FieldAccess: 
+ 19               Identifier: i2

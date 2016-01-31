@@ -1,0 +1,31 @@
+
+   Program: 
+  5   FnDecl: 
+         (return type) Type: void
+  5      Identifier: main
+         (body) StmtBlock: 
+  6         VarDecl: 
+               Type: vec4
+  6            Identifier: myVar
+  7         VarDecl: 
+               Type: vec2
+  7            Identifier: a
+  8         VarDecl: 
+               Type: vec2
+  8            Identifier: b
+  9         AssignExpr: 
+  9            FieldAccess: 
+  9               Identifier: a
+  9            Operator: =
+  9            FieldAccess: 
+  9               FieldAccess: 
+  9                  Identifier: myVar
+  9               Identifier: xy
+ 10         AssignExpr: 
+ 10            FieldAccess: 
+ 10               Identifier: b
+ 10            Operator: =
+ 10            FieldAccess: 
+ 10               FieldAccess: 
+ 10                  Identifier: myVar
+ 10               Identifier: xz

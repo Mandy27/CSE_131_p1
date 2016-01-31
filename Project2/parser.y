@@ -73,6 +73,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Stmt* compoundstmt;
     Expr * exprstmt ;
     Case * caselabel;
+    Default *defaultlabel;
     WhileStmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
 }
@@ -150,7 +151,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <caselabel> CaseLabel
 %type <iterationstmt> IterationStmt
 %type <SwitchStmtList> SwitchStmtList
-%type <defaultlable> DefaultLabel
+%type <defaultlabel> DefaultLabel
 
 %nonassoc "No_Else"
 %nonassoc T_Else
@@ -178,7 +179,7 @@ DeclList  :    DeclList Decl                              { ($$=$1)->Append($2);
           ;
 
 Decl      :    VarDecl ';'                                {$$ = $1;}
- 	  |    FnDecl  ';'                                {$$ = $1;}
+ 	  |    FnDecl                                     {$$ = $1;}
           ;
           
 VarDecl   :   Var           	                          { $$ = $1;}
@@ -282,8 +283,8 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
            | SwitchStmt                                   { $$=$1;}
-           /*| Decl                                         { $$=$1;}
-           | CaseLabel                                    { $$= $1;}*/
+           | Decl                                         { }
+           | CaseLabel                                    { $$= $1;}
            | SelectionStmt                                {$$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
@@ -301,7 +302,7 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 	      |						  {$$ = new List<Stmt*>;}
               ;
 
-SwitchStmt: T_Switch '(' Expr ')' '{' CaseList Default '}'  {}
+SwitchStmt: T_Switch '(' Expr ')' '{' CaseList DefaultLabel '}'  {}
           ;
 
 CaseList : CaseLabel      {}
@@ -311,12 +312,12 @@ CaseList : CaseLabel      {}
 CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
          ;
 
-Default  : T_Default ':' SwitchStmtList                      {}
+DefaultLabel  : T_Default ':' SwitchStmtList                      {}
 	 |                                                   {}
  	 ;
 
-CompoundStmt : '{' '}'                      {}
-             | '{' StmtList '}'            {}
+CompoundStmt : '{''}'                                     { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
+             | '{' StmtList '}'                           {$$ = new StmtBlock(new List<VarDecl*>, $2);}
              ;
              
 StmtBlock : CompoundStmt                                   {}
