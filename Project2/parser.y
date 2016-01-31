@@ -54,7 +54,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr *postexpr;  //cant declare PostExpr
     Expr *mulexpr;
     Expr *addexpr;
-    Expr *relativeexpr;
+    Expr *relationexpr;
     Expr *equalityexpr;
     Expr *logandexpr;
     Expr *logorexpr;
@@ -134,7 +134,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <identify> Identifier
 %type <mulexpr> MulExpr
 %type <addexpr> AddExpr
-%type <relativeexpr> RelationalExpr
+%type <relationexpr> RelationalExpr
 %type <equalityexpr> EqualityExpr
 %type <logandexpr> LogAndExpr
 %type <logorexpr> LogOrExpr
@@ -180,19 +180,19 @@ DeclList  :    DeclList Decl                              { ($$=$1)->Append($2);
           |    Decl                                       { ($$ = new List<Decl*>)->Append($1); }
           ;
 
-Decl      :    VarDecl ';'                                {$$ = $1;}
+Decl      :    VarDecl                                    {$$ = $1;}
  	  |    FnDecl                                     {$$ = $1;}
           ;
           
-VarDecl   :   Var           	                          { $$ = $1;}
-          |   Var '=' PriExpr                             {}
+VarDecl   :   Var ';'          	                          { $$ = $1;}
+          |   Var '=' PriExpr ';'                             {}
 	  ;
 
 Var       :  Type Identifier        			  {$$= new VarDecl($2,$1);}
           ;
 
-VarDeclList : VarDecl                                     {}
-            | VarDeclList VarDecl                         {}
+VarDeclList : VarDecl                                     {($$ = new List<VarDecl*>)->Append($1); }
+            | VarDeclList VarDecl                         {($$=$1)->Append($2); }
             ;
 
 Identifier:  T_Identifier   	                          {$$=new Identifier(@1, $1);}
@@ -293,9 +293,7 @@ SimpleStmt : ExprStmt                                     { $$ =$1;}
            | IterationStmt                                { $$ =$1;}
            ;
            
-Stmt : SimpleStmt                                         {$$ =$1;}
-     | CompoundStmt                                       {$$=$1;}
-     | Decl                                               {}
+Stmt : StmtBlock                                         {$$ =$1;}
      ;
 
 StmtList : Stmt                                           {($$ = new List<Stmt*>)->Append($1);}
@@ -323,8 +321,8 @@ DefaultLabel  : T_Default ':' SwitchStmtList                      {}
 
 CompoundStmt : '{''}'                                     { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
              | '{' StmtList '}'                           {$$ = new StmtBlock(new List<VarDecl*>, $2);}
-             | '{' VarDeclList StmtList '}'               {}
-             | '{' VarDeclList '}'                         {}
+             | '{' VarDeclList StmtList '}'               {$$ = new StmtBlock($2, $3);}
+             | '{' VarDeclList '}'                         {$$ = new StmtBlock($2, new List<Stmt*>);}
              ;
              
 StmtBlock : CompoundStmt                                   {}
@@ -383,5 +381,5 @@ Condition : Expr                                          {}
 void InitParser()
 {
    PrintDebug("parser", "Initializing parser");
-   yydebug = false;
+   yydebug = true;
 }
