@@ -65,10 +65,16 @@ void yyerror(const char *msg); // standard error-handling routine
     Operator *assignoper;
     Operator *unaryoper;
     Stmt *stmt;
+    Stmt *simplestmt;
     List<Stmt*> *stmtlist;
     //StmtBlock* stmtblock;
+    IfStmt* selectionstmt;
     SwitchStmt *switchstmt;
     Stmt* compoundstmt;
+    Expr * exprstmt ;
+    Case * caselabel;
+    WhileStmt *iterationstmt;
+    List<Stmt*>  *SwitchStmtList;
 }
 
 
@@ -134,10 +140,16 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <assignoper> AssignOper
 %type <assignoper> UnaryOper
 %type <stmt> Stmt
+%type <simplestmt> SimpleStmt
 %type <stmtlist> StmtList
 //%type <stmtblock> StmtBlock
 %type <switchstmt> SwitchStmt
 %type <compoundstmt> CompoundStmt
+%type <selectionstmt> SelectionStmt
+%type <exprstmt> ExprStmt  
+%type <caselabel> CaseLabel
+%type <iterationstmt> IterationStmt
+%type <SwitchStmtList> SwitchStmtList
 %%
 /* Rules
  * -----
@@ -251,7 +263,7 @@ AssignOper: '='                                           {$$= new Operator(@1, 
 PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
-          | PostExpr '.' Identifier	          {$$ = new FieldAccess($1, $3);} 
+          | PostExpr '.' Identifier	                  {$$ = new FieldAccess($1, $3);} 
 	  ;
           
 UnaryOper : '+'                                           {$$= new Operator(@1, "+");}
@@ -264,33 +276,26 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
 	  ;
 
-SimpleStmt : ExprStmt                             {}
-           | SwitchStmt                              {}
-<<<<<<< HEAD
-   	   | Decl
-	   /*
-selection_statement
-case_label
-iteration_statement
-*/
-=======
-           | Decl                                  {}
-           | CaseLabel                             {}
-           | SelectionStmt                                {}
-           | IterationStmt                                {}
->>>>>>> b0505606579d659d02ef651f87fdddebd668bf26
+SimpleStmt : ExprStmt                                     { $$ =$1;}
+           | SwitchStmt                                   { $$=$1;}
+   /*        | Decl                                         { $$=$1;}
+   */
+           | CaseLabel                                    { $$= $1;}
+           | SelectionStmt                                {$$=$1;}
+           | IterationStmt                                { $$ =$1;}
            ;
            
-Stmt : SimpleStmt                                         {}
-     | CompoundStmt                                       {}
+Stmt : SimpleStmt                                         {$$ =$1;}
+     | CompoundStmt                                       {$$=$1;}
      ;
 
-StmtList : Stmt                                           {}
-         | StmtList Stmt                                  {}
+StmtList : Stmt                                           {($$ = new List<Stmt*>)->Append($1);}
+         | StmtList Stmt                                  { ($$ = $1)->Append($2);}
          ;
          
-SwitchStmtList: StmtList                                  {}
+SwitchStmtList: StmtList                                  {$$=$1;}
               /* NOTHING */
+	      |						  {$$ = new List<Stmt*>;}
               ;
 
 SwitchStmt: T_Switch '(' Expr ')' '{' SwitchStmtList '}'  {}
@@ -304,8 +309,8 @@ StmtBlock : CompoundStmt                                   {}
           | SimpleStmt                                     {}
           ;
           
-ExprStmt : ';'                                            {}
-         |  Expr ';'                                      {}
+ExprStmt : ';'                                            {$$ = new EmptyExpr();}
+         |  Expr ';'                                      {$$ =$1;}
          ;
          
 CaseLabel: T_Case Expr ':'                                {}
