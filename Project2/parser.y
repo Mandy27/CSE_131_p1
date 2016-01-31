@@ -75,7 +75,6 @@ void yyerror(const char *msg); // standard error-handling routine
     Case * caselabel;
     WhileStmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
-    Default *defaultlabel;
 }
 
 
@@ -144,14 +143,13 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <simplestmt> SimpleStmt
 %type <stmtlist> StmtList
 //%type <stmtblock> StmtBlock
-%type <switchstmt> SwitchStmt
+//%type <switchstmt> SwitchStmt
 %type <compoundstmt> CompoundStmt
 %type <selectionstmt> SelectionStmt
 %type <exprstmt> ExprStmt  
-%type <caselabel> CaseLabel
+//%type <caselabel> CaseLabel
 %type <iterationstmt> IterationStmt
 %type <SwitchStmtList> SwitchStmtList
-%type <defaultlable> DefaultLabel
 %%
 /* Rules
  * -----
@@ -279,10 +277,11 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 	  ;
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
-           | SwitchStmt                                   { $$=$1;}
+           /*| SwitchStmt                                   { $$=$1;}
    /*        | Decl                                         { $$=$1;}
    */
-           | CaseLabel                                    { $$= $1;}
+           /*| CaseLabel                                    { $$= $1;}
+	   */
            | SelectionStmt                                {$$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
@@ -300,20 +299,20 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 	      |						  {$$ = new List<Stmt*>;}
               ;
 
-SwitchStmt: T_Switch '(' Expr ')' '{' CaseList DefaultLabel '}'  {}
+/*SwitchStmt: T_Switch '(' Expr ')' '{' CaseList Default '}'  {}
           ;
-
-CaseList : CaseLabel      {}
+*/
+/*CaseList : CaseLabel      {}
 	 | CaseList CaseLabel {}
 	 ;
-
-CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
+*/
+/*CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
          ;
-
-DefaultLabel  : T_Default ':' SwitchStmtList                      {}
+*/
+/*Default  : T_Default ':' SwitchStmtList                      {}
 	 |                                                   {}
  	 ;
-
+*/
 CompoundStmt : '{' '}'                      {}
              | '{' StmtList '}'            {}
              ;
