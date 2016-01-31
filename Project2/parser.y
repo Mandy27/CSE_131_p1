@@ -76,6 +76,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Default *defaultlabel;
     WhileStmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
+    List<VarDecl*> *vardecllist;
 }
 
 
@@ -152,6 +153,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <iterationstmt> IterationStmt
 %type <SwitchStmtList> SwitchStmtList
 %type <defaultlabel> DefaultLabel
+%type <vardecllist> VarDeclList
 
 %nonassoc "No_Else"
 %nonassoc T_Else
@@ -188,6 +190,10 @@ VarDecl   :   Var           	                          { $$ = $1;}
 
 Var       :  Type Identifier        			  {$$= new VarDecl($2,$1);}
           ;
+
+VarDeclList : VarDecl                                     {}
+            | VarDeclList VarDecl                         {}
+            ;
 
 Identifier:  T_Identifier   	                          {$$=new Identifier(@1, $1);}
           ;
@@ -283,15 +289,13 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
            | SwitchStmt                                   { $$=$1;}
-           /*| Decl                                         { }
-           | CaseLabel                                    { $$= $1;}
-	   */
            | SelectionStmt                                {$$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
            
 Stmt : SimpleStmt                                         {$$ =$1;}
      | CompoundStmt                                       {$$=$1;}
+     | Decl                                               {}
      ;
 
 StmtList : Stmt                                           {($$ = new List<Stmt*>)->Append($1);}
@@ -319,6 +323,8 @@ DefaultLabel  : T_Default ':' SwitchStmtList                      {}
 
 CompoundStmt : '{''}'                                     { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
              | '{' StmtList '}'                           {$$ = new StmtBlock(new List<VarDecl*>, $2);}
+             | '{' VarDeclList StmtList '}'               {}
+             | '{' VarDeclList '}'                         {}
              ;
              
 StmtBlock : CompoundStmt                                   {}
