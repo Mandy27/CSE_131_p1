@@ -67,7 +67,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Stmt *stmt;
     Stmt *simplestmt;
     List<Stmt*> *stmtlist;
-    //StmtBlock* stmtblock;
+    StmtBlock* stmtblock;
     IfStmt* selectionstmt;
     SwitchStmt *switchstmt;
     Stmt* compoundstmt;
@@ -143,7 +143,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmt> Stmt
 %type <simplestmt> SimpleStmt
 %type <stmtlist> StmtList
-//%type <stmtblock> StmtBlock
+%type <stmtblock> StmtBlock
 %type <switchstmt> SwitchStmt
 %type <compoundstmt> CompoundStmt
 %type <selectionstmt> SelectionStmt
@@ -280,9 +280,8 @@ UnaryExpr : PostExpr					  {$$ = $1;}
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
            | SwitchStmt                                   { $$=$1;}
-   /*        | Decl                                         { $$=$1;}
-   */
-           | CaseLabel                                    { $$= $1;}
+           /*| Decl                                         { $$=$1;}
+           | CaseLabel                                    { $$= $1;}*/
            | SelectionStmt                                {$$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
