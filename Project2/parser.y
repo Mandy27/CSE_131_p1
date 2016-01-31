@@ -152,6 +152,10 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <iterationstmt> IterationStmt
 %type <SwitchStmtList> SwitchStmtList
 %type <defaultlable> DefaultLabel
+
+%nonassoc "No_Else"
+%nonassoc T_Else
+
 %%
 /* Rules
  * -----
@@ -326,12 +330,9 @@ ExprStmt : ';'                                            {$$ = new EmptyExpr();
          ;
          
          
-SelectionStmt : T_If '(' Expr ')' SelectionRestStmt                         {}
+SelectionStmt : T_If '(' Expr ')' StmtBlock   %prec "No_Else"                         {}
+              | T_If '(' Expr ')' StmtBlock T_Else StmtBlock        {}
               ;
-              
-SelectionRestStmt : StmtBlock T_Else StmtBlock          {}
-                  | StmtBlock                            {}
-                  ;
                   
 IterationStmt: T_While '(' Condition ')' StmtBlock  {}
              | T_For '(' ForInitStmt ForRestStmt ')' StmtBlock  {}
