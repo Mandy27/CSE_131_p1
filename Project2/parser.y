@@ -269,10 +269,10 @@ AssignExpr: LogOrExpr    				  { $$ =$1;}
 	  ;
 
 AssignOper: '='                                           {$$= new Operator(@1, "=");}
-          | "*="                                          {$$= new Operator(@1, "*=");}
-          | "/="                                          {$$= new Operator(@1, "/=");}
-          | "+="                                          {$$= new Operator(@1, "+=");}
-          | "-="                                          {$$= new Operator(@1, "-=");}
+          | T_MulAssign                                   {$$= new Operator(@1, "*=");}
+          | T_DivAssign                                   {$$= new Operator(@1, "/=");}
+          | T_AddAssign                                   {$$= new Operator(@1, "+=");}
+          | T_SubAssign                                   {$$= new Operator(@1, "-=");}
           ;
 
 PostExpr  : PriExpr					  {$$=$1;}
