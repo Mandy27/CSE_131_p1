@@ -342,7 +342,6 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 
 SwitchStmt: T_Switch T_LeftParen Expr T_RightParen T_LeftBrace CaseList DefaultLabel T_RightBrace  {$$ =new SwitchStmt($3, $6,$7);}
           | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace DefaultLabel T_RightBrace  {ReportError::Formatted(&@$,"No Case in Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
-          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace error T_RightBrace  {ReportError::Formatted(&@$,"Empty Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
           ;
 
 CaseList : CaseLabel      				   {($$ = new List<Case*>)->Append($1);}
