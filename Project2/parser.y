@@ -74,7 +74,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr * exprstmt ;
     Case * caselabel;
     Default *defaultlabel;
-    WhileStmt *iterationstmt;
+    ForStmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
     List<VarDecl*> *vardecllist;
 }
@@ -154,7 +154,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <SwitchStmtList> SwitchStmtList
 %type <defaultlabel> DefaultLabel
 %type <vardecllist> VarDeclList
-
 %nonassoc "No_Else"
 %nonassoc T_Else
 %%
@@ -338,24 +337,20 @@ SelectionStmt : T_If '(' Expr ')' StmtBlock   %prec "No_Else"                   
               | T_If '(' Expr ')' StmtBlock T_Else StmtBlock        {}
               ;
                   
-IterationStmt: T_While '(' Condition ')' StmtBlock  {}
-             | T_For '(' ForInitStmt ForRestStmt ')' StmtBlock  {}
+IterationStmt:/* T_While '(' Condition ')' StmtBlock  {}*/
+             | T_For '(' ExprStmt ConditionOpt ';' ')' StmtBlock        {$$= new ForStmt($3, $4, new EmptyExpr(), $7);}
+             | T_For '(' ';'  ConditionOpt ';' ')' StmtBlock            {$$= new ForStmt(new EmptyExpr(), $4, new EmptyExpr(), $7);}
+             | T_For '(' ExprStmt ConditionOpt ';' Expr  ')' StmtBlock  {$$= new ForStmt($3, $4, $6, $8);}
+             | T_For '(' ';'  ConditionOpt ';' Expr ')' StmtBlock       {$$= new ForStmt(new EmptyExpr(), $4, $6, $8);}
              ;
              
-ForInitStmt: ExprStmt                                     {}
-           | Decl                             {}
-           ;
-           
-ForRestStmt: ConditionOpt ';'                             {}
-           | ConditionOpt ';' Expr                        {}
-           ;
-
-ConditionOpt: Condition                                   {}
+ConditionOpt: Condition                                   {$$=$1;}
             /* EMPTY */
+	    |						  {$$= new EmptyExpr();}
             ;           
 
-Condition : Expr                                          {}
-          | Type Identifier T_Equal AssignExpr           {}
+Condition : Expr                                          {$$=$1;}
+          | Type Identifier T_Equal AssignExpr            {}
           ;
 %%
 
