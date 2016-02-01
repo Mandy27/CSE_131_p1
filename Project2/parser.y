@@ -170,16 +170,16 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <vector> Vector
 //%type <init> Init
 
-/*%right '=' T_AddAssign T_SubAssign T_MulAssign T_DivAssign
+%right '=' T_AddAssign T_SubAssign T_MulAssign T_DivAssign
 %left T_Or
 %left T_And
 %left T_Equal T_NotEqual
 %left '<' '>' T_LessEqual T_GreaterEqual
 %left T_Plus T_Dash
 %left T_Star T_Slash
-%right T_Inc T_Dec T_Plus T_Dash
-%left T_LeftParen T_RightParen T_Dot T_Inc T_Dec
-%nonassoc T_LeftParen T_RightParen*/
+%right T_Inc T_Dec
+%left T_Dot
+%nonassoc T_LeftParen T_RightParen
 %nonassoc "No_Else"
 %nonassoc T_Else
 %%
@@ -340,7 +340,8 @@ SwitchStmtList: StmtList                                  {$$=$1;}
               ;
 
 SwitchStmt: T_Switch T_LeftParen Expr T_RightParen T_LeftBrace CaseList DefaultLabel T_RightBrace  {$$ =new SwitchStmt($3, $6,$7);}
-          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace error T_RightBrace                  {ReportError::Formatted(&@$,"Empty Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
+          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace DefaultLabel T_RightBrace  {ReportError::Formatted(&@$,"No Case in Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
+          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace error T_RightBrace  {ReportError::Formatted(&@$,"Empty Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
           ;
 
 CaseList : CaseLabel      				   {($$ = new List<Case*>)->Append($1);}
@@ -354,7 +355,7 @@ DefaultLabel  : T_Default ':' SwitchStmtList               {$$= new  Default($3)
 	 |/*TODO*/                                         {$$ = NULL;}
  	 ;
 
-CompoundStmt : T_LeftBrace T_RightBrace                           { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
+CompoundStmt : T_LeftBrace T_RightBrace                           {$$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
              | T_LeftBrace StmtList T_RightBrace                  {$$ = new StmtBlock(new List<VarDecl*>, $2);}
              | T_LeftBrace VarDeclList StmtList T_RightBrace      {$$ = new StmtBlock($2, $3);}
              | T_LeftBrace VarDeclList T_RightBrace               {$$ = new StmtBlock($2, new List<Stmt*>);}
