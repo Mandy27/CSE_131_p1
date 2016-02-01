@@ -243,21 +243,21 @@ AddExpr	  : MulExpr					  { $$ = $1;}
 RelationalExpr: AddExpr				          {$$ =$1;}
               | RelationalExpr '<' AddExpr	          {$$ = new RelationalExpr($1, new Operator(@2, "<"), $3);}
               | RelationalExpr '>' AddExpr		  {$$ = new RelationalExpr($1, new Operator(@2, ">"), $3);}
-              | RelationalExpr "<=" AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, "<="), $3);}
-              | RelationalExpr ">=" AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, ">="), $3);}
+              | RelationalExpr T_LessEqual AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, "<="), $3);}
+              | RelationalExpr T_GreaterEqual AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, ">="), $3);}
               ;
 
 EqualityExpr: RelationalExpr				  { $$ =$1;}
-	    | EqualityExpr "==" RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "=="), $3);}
-	    | EqualityExpr "!=" RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
+	    | EqualityExpr T_Equal RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "=="), $3);}
+	    | EqualityExpr T_NotEqual RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
 	    ;
 
 LogAndExpr: EqualityExpr 				  {$$ = $1;}
-	  | LogAndExpr "&&" EqualityExpr  		  {$$= new LogicalExpr( $1, new Operator(@2, "&&"), $3);}
+	  | LogAndExpr T_And EqualityExpr  		  {$$= new LogicalExpr( $1, new Operator(@2, "&&"), $3);}
 	  ;
 
 LogOrExpr : LogAndExpr					  { $$ = $1;}
-	  | LogOrExpr "||"  LogAndExpr			  {$$= new LogicalExpr( $1, new Operator(@2, "||"), $3);}
+	  | LogOrExpr T_Or  LogAndExpr			  {$$= new LogicalExpr( $1, new Operator(@2, "||"), $3);}
 	  ;
 
 AssignExpr: LogOrExpr    				  { $$ =$1;}
@@ -272,8 +272,8 @@ AssignOper: '='                                           {$$= new Operator(@1, 
           ;
 
 PostExpr  : PriExpr					  {$$=$1;}
-	  | PostExpr "++" 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
-	  | PostExpr "--" 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
+	  | PostExpr T_Inc 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
+	  | PostExpr T_Dec 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
           | PostExpr '.' Identifier	                  {$$ = new FieldAccess($1, $3);} 
 	  ;
           
@@ -381,5 +381,5 @@ Condition : Expr                                          {}
 void InitParser()
 {
    PrintDebug("parser", "Initializing parser");
-   yydebug = true;
+   yydebug = false;
 }
