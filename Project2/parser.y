@@ -81,6 +81,12 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr *conditionopt;
     Expr *condition;
     List<Expr*> *paramList;
+
+    Call *vector;
+   /* struct init{
+      VarDecl *l;
+      Expr    *r;
+    }init;*/
 }
 
 
@@ -161,6 +167,8 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <conditionopt> ConditionOpt
 %type <condition> Condition
 %type <paramList> ParamList
+%type <vector> Vector
+//%type <init> Init
 
 /*%right '=' T_AddAssign T_SubAssign T_MulAssign T_DivAssign
 %left T_Or
@@ -202,7 +210,8 @@ Decl      :    VarDecl                                    {$$ = $1;}
           ;
           
 VarDecl   :   Var ';'          	                          { $$ = $1;}
-          |   Var '=' PriExpr ';'                             {}
+          |   Type Identifier '=' PriExpr ';'             {/*printf("here"); 
+	  						  VarDecl *n1 = new VarDecl($2,$1); Expr* = new AssignExpr($2, new Operator(@1, "="), $4);*/}
 	  ;
 
 Var       :  Type Identifier        			  {$$= new VarDecl($2,$1);}
@@ -241,14 +250,19 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | T_BoolConstant			          {$$ = new BoolConstant(@1,$1);}
           | Identifier					  {$$ = new FieldAccess(NULL, $1);}
 	  | T_LeftParen Expr T_RightParen		  {$$ = $2;}
+	  | Vector 					  {$$ =$1;}
 	  ;
           
 Expr 	  : AssignExpr                                    { $$ =$1;}
-          | T_Identifier T_LeftParen ParamList T_RightParen {$$ = new Call(@1,NULL, new Identifier(@1, $1), $3);}
           ;
 
-ParamList : ParamList ',' Expr {($$=$1)->Append($3);}
-          | Expr  {($$ = new List<Expr*>)->Append($1);}
+Vector	  : T_Vec2 T_LeftParen ParamList T_RightParen    {$$ = new Call(@1,NULL, new Identifier(@1, "vec2"), $3);}
+	  | T_Vec3 T_LeftParen ParamList T_RightParen    {$$ = new Call(@1,NULL, new Identifier(@1, "vec3"), $3);}
+	  | T_Vec4 T_LeftParen ParamList T_RightParen    {$$ = new Call(@1,NULL, new Identifier(@1, "vec4"), $3);}
+          ;
+
+ParamList : ParamList ',' Expr                            {($$=$1)->Append($3);}
+          | Expr                                          {($$ = new List<Expr*>)->Append($1);}
 	  ;
 
 MulExpr   : UnaryExpr                    		  { $$ = $1;}
