@@ -1,0 +1,13 @@
+   Program: 
+  1   FnDecl: 
+         (return type) Type: void
+  1      Identifier: main
+         (body) StmtBlock: 
+  2         AssignExpr: 
+  2            FieldAccess: 
+  2               Identifier: v2
+  2            Operator: =
+  2            Call: 
+  2               Identifier: vec2
+  2               (actuals) FloatConstant: 1.2
+  2               (actuals) FloatConstant: 2.2

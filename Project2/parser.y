@@ -80,6 +80,7 @@ void yyerror(const char *msg); // standard error-handling routine
     List<VarDecl*> *vardecllist;
     Expr *conditionopt;
     Expr *condition;
+    List<Expr*> *paramList;
 }
 
 
@@ -147,7 +148,6 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmt> Stmt
 %type <simplestmt> SimpleStmt
 %type <stmtlist> StmtList
-%type <stmtblock> StmtBlock
 %type <switchstmt> SwitchStmt
 %type <compoundstmt> CompoundStmt
 %type <selectionstmt> SelectionStmt
@@ -160,6 +160,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <vardecllist> VarDeclList
 %type <conditionopt> ConditionOpt
 %type <condition> Condition
+%type <paramList> ParamList
 
 %nonassoc "No_Else"
 %nonassoc T_Else
@@ -215,8 +216,8 @@ Type      :  T_Int    			                  { $$ = Type::intType;}      /*type_sp
 	  |  T_Mat4			                  { $$ = Type::mat4Type;}
           ;
 
-FnDecl	  :  Type Identifier '(' Param ')' CompoundStmt               { $$ = new FnDecl($2, $1, $4); $$->SetFunctionBody($6);} 
-  	  |  T_Void Identifier '(' Param ')' CompoundStmt              { $$ = new FnDecl($2, Type::voidType, $4);$$->SetFunctionBody($6);} 
+FnDecl	  :  Type Identifier '(' Param ')' CompoundStmt   {$$ = new FnDecl($2, $1, $4); $$->SetFunctionBody($6);} 
+  	  |  T_Void Identifier '(' Param ')' CompoundStmt {$$ = new FnDecl($2, Type::voidType, $4);$$->SetFunctionBody($6);} 
 	  ;
 	   
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
@@ -233,7 +234,12 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  ;
           
 Expr 	  : AssignExpr                                    { $$ =$1;}
+          | T_Identifier '('ParamList ')'          {$$ = new Call(@1,NULL, new Identifier(@1, $1), $3);}
           ;
+
+ParamList : ParamList ',' Expr {($$=$1)->Append($3);}
+          | Expr  {($$ = new List<Expr*>)->Append($1);}
+	  ;
 
 MulExpr   : UnaryExpr                    		  { $$ = $1;}
 	  | MulExpr '*' UnaryExpr			  { $$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
@@ -249,13 +255,13 @@ AddExpr	  : MulExpr					  { $$ = $1;}
 RelationalExpr: AddExpr				          {$$ =$1;}
               | RelationalExpr '<' AddExpr	          {$$ = new RelationalExpr($1, new Operator(@2, "<"), $3);}
               | RelationalExpr '>' AddExpr		  {$$ = new RelationalExpr($1, new Operator(@2, ">"), $3);}
-              | RelationalExpr T_LessEqual AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, "<="), $3);}
-              | RelationalExpr T_GreaterEqual AddExpr               {$$ = new RelationalExpr($1, new Operator(@2, ">="), $3);}
+              | RelationalExpr T_LessEqual AddExpr        {$$ = new RelationalExpr($1, new Operator(@2, "<="), $3);}
+              | RelationalExpr T_GreaterEqual AddExpr     {$$ = new RelationalExpr($1, new Operator(@2, ">="), $3);}
               ;
 
 EqualityExpr: RelationalExpr				  { $$ =$1;}
-	    | EqualityExpr T_Equal RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "=="), $3);}
-	    | EqualityExpr T_NotEqual RelationalExpr            { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
+	    | EqualityExpr T_Equal RelationalExpr         { $$= new EqualityExpr( $1, new Operator(@2, "=="), $3);}
+	    | EqualityExpr T_NotEqual RelationalExpr      { $$= new EqualityExpr( $1, new Operator(@2, "!="), $3);}
 	    ;
 
 LogAndExpr: EqualityExpr 				  {$$ = $1;}
@@ -299,8 +305,6 @@ SimpleStmt : ExprStmt                                     { $$ =$1;}
            | IterationStmt                                { $$ =$1;}
            ;
            
-Stmt : StmtBlock                                         {$$ =$1;}
-     ;
 
 StmtList : Stmt                                           {($$ = new List<Stmt*>)->Append($1);}
          | StmtList Stmt                                  { ($$ = $1)->Append($2);}
@@ -318,11 +322,11 @@ CaseList : CaseLabel      				   {($$ = new List<Case*>)->Append($1);}
 	 | CaseList CaseLabel 				   {($$ = $1)->Append($2);}
 	 ;
 
-CaseLabel: T_Case T_IntConstant ':' SwitchStmtList                    {$$ = new Case(new IntConstant(@2,$2), $4);}
+CaseLabel: T_Case Expr ':' SwitchStmtList         {$$ = new Case($2, $4);}
          ;
 
-DefaultLabel  : T_Default ':' SwitchStmtList                     {$$= new  Default($3);}
-	 |/*TODO*/                                               {}
+DefaultLabel  : T_Default ':' SwitchStmtList               {$$= new  Default($3);}
+	 |/*TODO*/                                         {$$ = NULL;}
  	 ;
 
 CompoundStmt : '{''}'                                     { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
@@ -331,8 +335,8 @@ CompoundStmt : '{''}'                                     { $$ = new StmtBlock(n
              | '{' VarDeclList '}'                         {$$ = new StmtBlock($2, new List<Stmt*>);}
              ;
              
-StmtBlock : CompoundStmt                                   {}
-          | SimpleStmt                                     {}
+Stmt      : CompoundStmt                                   {$$=$1;}
+          | SimpleStmt                                     {$$=$1;}
           ;
           
 ExprStmt : ';'                                            {$$ = new EmptyExpr();}
@@ -340,14 +344,14 @@ ExprStmt : ';'                                            {$$ = new EmptyExpr();
          ;
          
          
-SelectionStmt : T_If '(' Expr ')' StmtBlock   %prec "No_Else"       {$$= new IfStmt($3, $5,NULL);}
-              | T_If '(' Expr ')' StmtBlock T_Else StmtBlock        {$$= new IfStmt($3, $5,$7);}
+SelectionStmt : T_If '(' Expr ')' Stmt   %prec "No_Else"       {$$= new IfStmt($3, $5,NULL);}
+              | T_If '(' Expr ')' Stmt T_Else Stmt        {$$= new IfStmt($3, $5,$7);}
               ;
                   
-IterationStmt: T_While '(' Condition ')' StmtBlock                      {$$ = new WhileStmt($3, $5);}
-             | T_For '(' ExprStmt ConditionOpt ';' ')' StmtBlock        {$$ = new ForStmt($3, $4, new EmptyExpr(), $7);}
+IterationStmt: T_While '(' Condition ')' Stmt                      {$$ = new WhileStmt($3, $5);}
+             | T_For '(' ExprStmt ConditionOpt ';' ')' Stmt        {$$ = new ForStmt($3, $4, new EmptyExpr(), $7);}
              /*| T_For '(' ';'  ConditionOpt ';' ')' StmtBlock            {$$ = new ForStmt(new EmptyExpr(), $4, new EmptyExpr(), $7);}*/
-             | T_For '(' ExprStmt ConditionOpt ';' Expr  ')' StmtBlock  {$$ = new ForStmt($3, $4, $6, $8);}
+             | T_For '(' ExprStmt ConditionOpt ';' Expr  ')' Stmt  {$$ = new ForStmt($3, $4, $6, $8);}
              /*| T_For '(' ';'  ConditionOpt ';' Expr ')' StmtBlock       {$$ = new ForStmt(new EmptyExpr(), $4, $6, $8);}*/
              ;
              
@@ -357,7 +361,6 @@ ConditionOpt: Condition                                   {$$=$1;}
             ;           
 
 Condition : Expr                                          {$$=$1;}
-          | Type Identifier T_Equal AssignExpr            {}
           ;
 %%
 

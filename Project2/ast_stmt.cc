@@ -75,7 +75,7 @@ void ReturnStmt::PrintChildren(int indentLevel) {
     expr->Print(indentLevel+1);
 }
   
-SwitchLabel::SwitchLabel(IntConstant *l, List<Stmt*> *s) {
+SwitchLabel::SwitchLabel(Expr *l, List<Stmt*> *s) {
     Assert(l != NULL && s != NULL);
     (label=l)->SetParent(this);
     (stmts=s)->SetParentAll(this);
