@@ -36,6 +36,7 @@ static void DoBeforeEachAction();
  * line later to provide context on errors.
  */
 %s N
+%s FIELDS
 %x COPY COMM
 %option stack
 
@@ -54,6 +55,7 @@ OPERATOR          ([-+/*%=.,;!<>()[\]{}:])
 BEG_COMMENT       ("/*")
 END_COMMENT       ("*/")
 SINGLE_COMMENT    ("//"[^\n]*)
+SWIZZLE 	  (x?y?z?w?)
 
 %%             /* BEGIN RULES SECTION */
 
@@ -76,7 +78,8 @@ SINGLE_COMMENT    ("//"[^\n]*)
                          return 0; }
 <COMM>.                { /* ignore everything else that doesn't match */ }
 {SINGLE_COMMENT}       { /* skip to end of line for // comment */ }
-
+<FIELDS>{SWIZZLE}      {strncpy(yylval.field, yytext, 4);
+ 			return T_Fields;}
 
  /* --------------------- Keywords ------------------------------- */
 "void"              { return T_Void;        }
@@ -122,7 +125,7 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "-"                 { return T_Dash;        }
 "*"                 { return T_Star;        }
 "/"                 { return T_Slash;       }
-"."                 { return T_Dot;         }
+"."                 { BEGIN(FIELDS); return T_Dot; }
 {OPERATOR}          { return yytext[0];     }
 
  /* -------------------- Constants ------------------------------ */

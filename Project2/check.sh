@@ -30,7 +30,7 @@ for file in $LIST; do
 	printf "Checking %-27s: " $file
 	if ! cmp -s $tmp $file; then
 		echo "FAIL <--"
-	#	diff $tmp $file
+		diff $tmp $file
 	else
 		echo "PASS"
 	fi

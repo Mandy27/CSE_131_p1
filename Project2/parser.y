@@ -44,6 +44,7 @@ void yyerror(const char *msg); // standard error-handling routine
     char *stringConstant;
     double doubleConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
+    char field[4];
     Decl *decl;
     List<Decl*> *declList;
     VarDecl *vardecl;
@@ -117,7 +118,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %token   <integerConstant> T_IntConstant
 %token   <doubleConstant> T_FloatConstant
 %token   <boolConstant> T_BoolConstant
-
+%token   <field> T_Fields
 
 /* Non-terminal types
  * ------------------
@@ -310,7 +311,7 @@ AssignOper: '='                                           {$$= new Operator(@1, 
 PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr T_Inc 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr T_Dec 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
-          | PostExpr T_Dot Identifier	                  {$$ = new FieldAccess($1, $3);} 
+          | PostExpr T_Dot T_Fields	                  {$$ = new FieldAccess($1, new Identifier(@3,$3));} 
 	  ;
           
 UnaryOper : T_Plus                                        {$$= new Operator(@1, "+");}
@@ -340,7 +341,7 @@ SwitchStmtList: StmtList                                  {$$=$1;}
               ;
 
 SwitchStmt: T_Switch T_LeftParen Expr T_RightParen T_LeftBrace CaseList DefaultLabel T_RightBrace  {$$ =new SwitchStmt($3, $6,$7);}
-          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace error T_RightBrace                  {ReportError::Formatted(&@$,"Empty Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
+          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace  T_RightBrace                  {ReportError::Formatted(&@$,"Empty Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
           ;
 
 CaseList : CaseLabel      				   {($$ = new List<Case*>)->Append($1);}
