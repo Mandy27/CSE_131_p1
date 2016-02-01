@@ -74,9 +74,11 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr * exprstmt ;
     Case * caselabel;
     Default *defaultlabel;
-    ForStmt *iterationstmt;
+    Stmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
     List<VarDecl*> *vardecllist;
+    Expr *conditionopt;
+    Expr *condition;
 }
 
 
@@ -154,6 +156,9 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <SwitchStmtList> SwitchStmtList
 %type <defaultlabel> DefaultLabel
 %type <vardecllist> VarDeclList
+%type <conditionopt> ConditionOpt
+%type <condition> Condition
+
 %nonassoc "No_Else"
 %nonassoc T_Else
 %%
@@ -337,11 +342,11 @@ SelectionStmt : T_If '(' Expr ')' StmtBlock   %prec "No_Else"                   
               | T_If '(' Expr ')' StmtBlock T_Else StmtBlock        {}
               ;
                   
-IterationStmt:/* T_While '(' Condition ')' StmtBlock  {}*/
-             | T_For '(' ExprStmt ConditionOpt ';' ')' StmtBlock        {$$= new ForStmt($3, $4, new EmptyExpr(), $7);}
-             | T_For '(' ';'  ConditionOpt ';' ')' StmtBlock            {$$= new ForStmt(new EmptyExpr(), $4, new EmptyExpr(), $7);}
-             | T_For '(' ExprStmt ConditionOpt ';' Expr  ')' StmtBlock  {$$= new ForStmt($3, $4, $6, $8);}
-             | T_For '(' ';'  ConditionOpt ';' Expr ')' StmtBlock       {$$= new ForStmt(new EmptyExpr(), $4, $6, $8);}
+IterationStmt: T_While '(' Condition ')' StmtBlock                      {$$ = new WhileStmt($3, $5);}
+             | T_For '(' ExprStmt ConditionOpt ';' ')' StmtBlock        {$$ = new ForStmt($3, $4, new EmptyExpr(), $7);}
+             /*| T_For '(' ';'  ConditionOpt ';' ')' StmtBlock            {$$ = new ForStmt(new EmptyExpr(), $4, new EmptyExpr(), $7);}*/
+             | T_For '(' ExprStmt ConditionOpt ';' Expr  ')' StmtBlock  {$$ = new ForStmt($3, $4, $6, $8);}
+             /*| T_For '(' ';'  ConditionOpt ';' Expr ')' StmtBlock       {$$ = new ForStmt(new EmptyExpr(), $4, $6, $8);}*/
              ;
              
 ConditionOpt: Condition                                   {$$=$1;}
