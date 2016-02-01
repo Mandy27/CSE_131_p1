@@ -92,12 +92,12 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "switch"            { return T_Switch;      }
 "case"              { return T_Case;        }
 "default"           { return T_Default;     }
-"vec2"		    { return T_Vec2;}
-"vec3"              { return T_Vec3;}
-"vec4"              { return T_Vec4;}
-"mat2" 		    { return T_Mat2;}
-"mat3"              { return T_Mat3;}
-"mat4"              { return T_Mat4;}
+"vec2"		    { return T_Vec2;        }
+"vec3"              { return T_Vec3;        }
+"vec4"              { return T_Vec4;        }
+"mat2" 		    { return T_Mat2;        }
+"mat3"              { return T_Mat3;        }
+"mat4"              { return T_Mat4;        }
 
 
  /* -------------------- Operators ----------------------------- */
