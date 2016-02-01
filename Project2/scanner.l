@@ -92,12 +92,12 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "switch"            { return T_Switch;      }
 "case"              { return T_Case;        }
 "default"           { return T_Default;     }
-"vec2"		    { return T_Vec2;}
-"vec3"              { return T_Vec3;}
-"vec4"              { return T_Vec4;}
-"mat2" 		    { return T_Mat2;}
-"mat3"              { return T_Mat3;}
-"mat4"              { return T_Mat4;}
+"vec2"		    { return T_Vec2;        }
+"vec3"              { return T_Vec3;        }
+"vec4"              { return T_Vec4;        }
+"mat2" 		    { return T_Mat2;        }
+"mat3"              { return T_Mat3;        }
+"mat4"              { return T_Mat4;        }
 
 
  /* -------------------- Operators ----------------------------- */
@@ -110,10 +110,19 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "[]"                { return T_Dims;        }
 "++"                { return T_Inc;         }
 "--"                { return T_Dec;         }
-"*="                { T_MulAssign;          }
-"/="                { T_DivAssign;          }
-"+="                { T_AddAssign;          }
-"-="                { T_SubAssign;          }
+"*="                { return T_MulAssign;   }
+"/="                { return T_DivAssign;   }
+"+="                { return T_AddAssign;   }
+"-="                { return T_SubAssign;   }
+"("                 { return T_LeftParen;   }
+")"                 { return T_RightParen;  }
+"{"                 { return T_LeftBrace;   }
+"}"                 { return T_RightBrace;  }
+"+"                 { return T_Plus;        }
+"-"                 { return T_Dash;        }
+"*"                 { return T_Star;        }
+"/"                 { return T_Slash;       }
+"."                 { return T_Dot;         }
 {OPERATOR}          { return yytext[0];     }
 
  /* -------------------- Constants ------------------------------ */

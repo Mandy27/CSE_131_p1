@@ -162,6 +162,16 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <condition> Condition
 %type <paramList> ParamList
 
+/*%right '=' T_AddAssign T_SubAssign T_MulAssign T_DivAssign
+%left T_Or
+%left T_And
+%left T_Equal T_NotEqual
+%left '<' '>' T_LessEqual T_GreaterEqual
+%left T_Plus T_Dash
+%left T_Star T_Slash
+%right T_Inc T_Dec T_Plus T_Dash
+%left T_LeftParen T_RightParen T_Dot T_Inc T_Dec
+%nonassoc T_LeftParen T_RightParen*/
 %nonassoc "No_Else"
 %nonassoc T_Else
 %%
@@ -216,8 +226,8 @@ Type      :  T_Int    			                  { $$ = Type::intType;}      /*type_sp
 	  |  T_Mat4			                  { $$ = Type::mat4Type;}
           ;
 
-FnDecl	  :  Type Identifier '(' Param ')' CompoundStmt   {$$ = new FnDecl($2, $1, $4); $$->SetFunctionBody($6);} 
-  	  |  T_Void Identifier '(' Param ')' CompoundStmt {$$ = new FnDecl($2, Type::voidType, $4);$$->SetFunctionBody($6);} 
+FnDecl	  :  Type Identifier T_LeftParen Param T_RightParen CompoundStmt   {$$ = new FnDecl($2, $1, $4); $$->SetFunctionBody($6);} 
+  	  |  T_Void Identifier T_LeftParen Param T_RightParen CompoundStmt {$$ = new FnDecl($2, Type::voidType, $4);$$->SetFunctionBody($6);} 
 	  ;
 	   
 Param	  : Param ',' Var	                          {($$ = $1)->Append($3);}
@@ -230,11 +240,11 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | T_FloatConstant				  {$$ = new FloatConstant(@1,$1);}
 	  | T_BoolConstant			          {$$ = new BoolConstant(@1,$1);}
           | Identifier					  {$$ = new FieldAccess(NULL, $1);}
-	  | '(' Expr ')'				  {$$ = $2;}
+	  | T_LeftParen Expr T_RightParen		  {$$ = $2;}
 	  ;
           
 Expr 	  : AssignExpr                                    { $$ =$1;}
-          | T_Identifier '('ParamList ')'          {$$ = new Call(@1,NULL, new Identifier(@1, $1), $3);}
+          | T_Identifier T_LeftParen ParamList T_RightParen {$$ = new Call(@1,NULL, new Identifier(@1, $1), $3);}
           ;
 
 ParamList : ParamList ',' Expr {($$=$1)->Append($3);}
@@ -242,13 +252,13 @@ ParamList : ParamList ',' Expr {($$=$1)->Append($3);}
 	  ;
 
 MulExpr   : UnaryExpr                    		  { $$ = $1;}
-	  | MulExpr '*' UnaryExpr			  { $$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
-	  | MulExpr '/' UnaryExpr                         { $$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
+	  | MulExpr T_Star UnaryExpr			  { $$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
+	  | MulExpr T_Slash UnaryExpr                         { $$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
 	  ;
 
 AddExpr	  : MulExpr					  { $$ = $1;}
-          | AddExpr '+' MulExpr 			  {$$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3);}
-	  | AddExpr '-' MulExpr				  {$$ = new ArithmeticExpr($1, new Operator(@2, "-"), $3);}
+          | AddExpr T_Plus MulExpr 			  {$$ = new ArithmeticExpr($1, new Operator(@2, "+"), $3);}
+	  | AddExpr T_Dash MulExpr				  {$$ = new ArithmeticExpr($1, new Operator(@2, "-"), $3);}
 	  ;
 
 
@@ -286,11 +296,11 @@ AssignOper: '='                                           {$$= new Operator(@1, 
 PostExpr  : PriExpr					  {$$=$1;}
 	  | PostExpr T_Inc 				  {$$ = new PostfixExpr($1, new Operator(@2, "++"));}
 	  | PostExpr T_Dec 				  {$$ = new PostfixExpr($1, new Operator(@2, "--"));}
-          | PostExpr '.' Identifier	                  {$$ = new FieldAccess($1, $3);} 
+          | PostExpr T_Dot Identifier	                  {$$ = new FieldAccess($1, $3);} 
 	  ;
           
-UnaryOper : '+'                                           {$$= new Operator(@1, "+");}
-          | '-'                                           {$$= new Operator(@1, "-");}
+UnaryOper : T_Plus                                        {$$= new Operator(@1, "+");}
+          | T_Dash                                        {$$= new Operator(@1, "-");}
           ;
           
 UnaryExpr : PostExpr					  {$$ = $1;}
@@ -315,7 +325,8 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 	      |						  {$$ = new List<Stmt*>;}
               ;
 
-SwitchStmt: T_Switch '(' Expr ')' '{' CaseList DefaultLabel '}'  {$$ =new SwitchStmt($3, $6,$7);}
+SwitchStmt: T_Switch T_LeftParen Expr T_RightParen T_LeftBrace CaseList DefaultLabel T_RightBrace  {$$ =new SwitchStmt($3, $6,$7);}
+          | T_Switch T_LeftParen Expr T_RightParen T_LeftBrace error T_RightBrace                  {ReportError::Formatted(&@$,"Empty Switch Statment Body !!!"); $$=new SwitchStmt($3, new List<Case*>, NULL);}
           ;
 
 CaseList : CaseLabel      				   {($$ = new List<Case*>)->Append($1);}
@@ -329,10 +340,10 @@ DefaultLabel  : T_Default ':' SwitchStmtList               {$$= new  Default($3)
 	 |/*TODO*/                                         {$$ = NULL;}
  	 ;
 
-CompoundStmt : '{''}'                                     { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
-             | '{' StmtList '}'                           {$$ = new StmtBlock(new List<VarDecl*>, $2);}
-             | '{' VarDeclList StmtList '}'               {$$ = new StmtBlock($2, $3);}
-             | '{' VarDeclList '}'                         {$$ = new StmtBlock($2, new List<Stmt*>);}
+CompoundStmt : T_LeftBrace T_RightBrace                           { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
+             | T_LeftBrace StmtList T_RightBrace                  {$$ = new StmtBlock(new List<VarDecl*>, $2);}
+             | T_LeftBrace VarDeclList StmtList T_RightBrace      {$$ = new StmtBlock($2, $3);}
+             | T_LeftBrace VarDeclList T_RightBrace               {$$ = new StmtBlock($2, new List<Stmt*>);}
              ;
              
 Stmt      : CompoundStmt                                   {$$=$1;}
@@ -344,15 +355,15 @@ ExprStmt : ';'                                            {$$ = new EmptyExpr();
          ;
          
          
-SelectionStmt : T_If '(' Expr ')' Stmt   %prec "No_Else"       {$$= new IfStmt($3, $5,NULL);}
-              | T_If '(' Expr ')' Stmt T_Else Stmt        {$$= new IfStmt($3, $5,$7);}
+SelectionStmt : T_If T_LeftParen Expr T_RightParen Stmt   %prec "No_Else"       {$$= new IfStmt($3, $5,NULL);}
+              | T_If T_LeftParen Expr T_RightParen Stmt T_Else Stmt        {$$= new IfStmt($3, $5,$7);}
               ;
                   
-IterationStmt: T_While '(' Condition ')' Stmt                      {$$ = new WhileStmt($3, $5);}
-             | T_For '(' ExprStmt ConditionOpt ';' ')' Stmt        {$$ = new ForStmt($3, $4, new EmptyExpr(), $7);}
-             /*| T_For '(' ';'  ConditionOpt ';' ')' StmtBlock            {$$ = new ForStmt(new EmptyExpr(), $4, new EmptyExpr(), $7);}*/
-             | T_For '(' ExprStmt ConditionOpt ';' Expr  ')' Stmt  {$$ = new ForStmt($3, $4, $6, $8);}
-             /*| T_For '(' ';'  ConditionOpt ';' Expr ')' StmtBlock       {$$ = new ForStmt(new EmptyExpr(), $4, $6, $8);}*/
+IterationStmt: T_While T_LeftParen Condition T_RightParen Stmt                      {$$ = new WhileStmt($3, $5);}
+             | T_For T_LeftParen ExprStmt ConditionOpt ';' T_RightParen Stmt        {$$ = new ForStmt($3, $4, new EmptyExpr(), $7);}
+             /*| T_For T_LeftParen ';'  ConditionOpt ';' T_RightParen StmtBlock            {$$ = new ForStmt(new EmptyExpr(), $4, new EmptyExpr(), $7);}*/
+             | T_For T_LeftParen ExprStmt ConditionOpt ';' Expr  T_RightParen Stmt  {$$ = new ForStmt($3, $4, $6, $8);}
+             /*| T_For T_LeftParen ';'  ConditionOpt ';' Expr T_RightParen StmtBlock       {$$ = new ForStmt(new EmptyExpr(), $4, $6, $8);}*/
              ;
              
 ConditionOpt: Condition                                   {$$=$1;}
