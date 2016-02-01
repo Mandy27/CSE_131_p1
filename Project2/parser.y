@@ -70,9 +70,10 @@ void yyerror(const char *msg); // standard error-handling routine
     StmtBlock* stmtblock;
     IfStmt* selectionstmt;
     SwitchStmt *switchstmt;
+    Case * caselabel;
+    List<Case*> *caselist;
     Stmt* compoundstmt;
     Expr * exprstmt ;
-    Case * caselabel;
     Default *defaultlabel;
     Stmt *iterationstmt;
     List<Stmt*>  *SwitchStmtList;
@@ -152,6 +153,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <selectionstmt> SelectionStmt
 %type <exprstmt> ExprStmt  
 %type <caselabel> CaseLabel
+%type <caselist> CaseList
 %type <iterationstmt> IterationStmt
 %type <SwitchStmtList> SwitchStmtList
 %type <defaultlabel> DefaultLabel
@@ -309,18 +311,18 @@ SwitchStmtList: StmtList                                  {$$=$1;}
 	      |						  {$$ = new List<Stmt*>;}
               ;
 
-SwitchStmt: T_Switch '(' Expr ')' '{' CaseList DefaultLabel '}'  {}
+SwitchStmt: T_Switch '(' Expr ')' '{' CaseList DefaultLabel '}'  {$$ =new SwitchStmt($3, $6,$7);}
           ;
 
-CaseList : CaseLabel      {}
-	 | CaseList CaseLabel {}
+CaseList : CaseLabel      				   {($$ = new List<Case*>)->Append($1);}
+	 | CaseList CaseLabel 				   {($$ = $1)->Append($2);}
 	 ;
 
-CaseLabel: T_Case Expr ':' SwitchStmtList                    {}
+CaseLabel: T_Case T_IntConstant ':' SwitchStmtList                    {$$ = new Case(new IntConstant(@2,$2), $4);}
          ;
 
-DefaultLabel  : T_Default ':' SwitchStmtList                      {}
-	 |                                                   {}
+DefaultLabel  : T_Default ':' SwitchStmtList                     {$$= new  Default($3);}
+	 |/*TODO*/                                               {}
  	 ;
 
 CompoundStmt : '{''}'                                     { $$ = new StmtBlock(new List<VarDecl*>, new List<Stmt*>);}
