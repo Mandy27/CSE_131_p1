@@ -81,6 +81,7 @@ void yyerror(const char *msg); // standard error-handling routine
     Expr *conditionopt;
     Expr *condition;
     List<Expr*> *paramList;
+    Call *vector;
 }
 
 
@@ -161,6 +162,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <conditionopt> ConditionOpt
 %type <condition> Condition
 %type <paramList> ParamList
+%type <vector> Vector
 
 %nonassoc "No_Else"
 %nonassoc T_Else
@@ -231,10 +233,15 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 	  | T_BoolConstant			          {$$ = new BoolConstant(@1,$1);}
           | Identifier					  {$$ = new FieldAccess(NULL, $1);}
 	  | '(' Expr ')'				  {$$ = $2;}
+	  | Vector {}
 	  ;
           
 Expr 	  : AssignExpr                                    { $$ =$1;}
-          | T_Identifier '('ParamList ')'          {$$ = new Call(@1,NULL, new Identifier(@1, $1), $3);}
+          ;
+
+Vector	  : T_Vec2 '('ParamList ')'          {$$ = new Call(@1,NULL, new Identifier(@1, "Vec2"), $3);}
+	  | T_Vec3 '('ParamList ')'          {$$ = new Call(@1,NULL, new Identifier(@1, "Vec3"), $3);}
+	  | T_Vec4 '('ParamList ')'          {$$ = new Call(@1,NULL, new Identifier(@1, "Vec4"), $3);}
           ;
 
 ParamList : ParamList ',' Expr {($$=$1)->Append($3);}

@@ -110,10 +110,10 @@ SINGLE_COMMENT    ("//"[^\n]*)
 "[]"                { return T_Dims;        }
 "++"                { return T_Inc;         }
 "--"                { return T_Dec;         }
-"*="                { T_MulAssign;          }
-"/="                { T_DivAssign;          }
-"+="                { T_AddAssign;          }
-"-="                { T_SubAssign;          }
+"*="                {  return T_MulAssign;  }
+"/="                { return T_DivAssign;   }
+"+="                { return T_AddAssign;   }
+"-="                { return T_SubAssign;   }
 {OPERATOR}          { return yytext[0];     }
 
  /* -------------------- Constants ------------------------------ */
