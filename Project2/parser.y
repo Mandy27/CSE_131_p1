@@ -209,7 +209,7 @@ Type      :  T_Int    			                  { $$ = Type::intType;}      /*type_sp
 	  |  T_Bool  			                  { $$ = Type::boolType;} 
 	  |  T_Vec2			                  { $$ = Type::vec2Type;}
 	  |  T_Vec3			                  { $$ = Type::vec3Type;}
-	  |  T_Vec4			                  { $$ = Type::vec3Type;}
+	  |  T_Vec4			                  { $$ = Type::vec4Type;}
 	  |  T_Mat2			                  { $$ = Type::mat2Type;}
 	  |  T_Mat3			                  { $$ = Type::mat3Type;}
 	  |  T_Mat4			                  { $$ = Type::mat4Type;}
@@ -235,7 +235,7 @@ PriExpr   : T_IntConstant				  {$$ = new IntConstant(@1,$1);}
 Expr 	  : AssignExpr                                    { $$ =$1;}
           ;
 
-MulExpr   : UnaryExpr	/*multiplicative*/		  { $$ = $1;}
+MulExpr   : UnaryExpr                    		  { $$ = $1;}
 	  | MulExpr '*' UnaryExpr			  { $$ = new ArithmeticExpr($1, new Operator(@2, "*"), $3);}
 	  | MulExpr '/' UnaryExpr                         { $$ = new ArithmeticExpr($1, new Operator(@2, "/"), $3);}
 	  ;
@@ -288,14 +288,14 @@ UnaryOper : '+'                                           {$$= new Operator(@1, 
           ;
           
 UnaryExpr : PostExpr					  {$$ = $1;}
-	  | "++" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "++"));}
-	  | "--" UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "--"));}
+	  | T_Inc UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "++"));}
+	  | T_Dec UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "--"));}
 	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
 	  ;
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}
            | SwitchStmt                                   { $$=$1;}
-           | SelectionStmt                                {$$=$1;}
+           | SelectionStmt                                { $$=$1;}
            | IterationStmt                                { $$ =$1;}
            ;
            
@@ -340,8 +340,8 @@ ExprStmt : ';'                                            {$$ = new EmptyExpr();
          ;
          
          
-SelectionStmt : T_If '(' Expr ')' StmtBlock   %prec "No_Else"                         {}
-              | T_If '(' Expr ')' StmtBlock T_Else StmtBlock        {}
+SelectionStmt : T_If '(' Expr ')' StmtBlock   %prec "No_Else"       {$$= new IfStmt($3, $5,NULL);}
+              | T_If '(' Expr ')' StmtBlock T_Else StmtBlock        {$$= new IfStmt($3, $5,$7);}
               ;
                   
 IterationStmt: T_While '(' Condition ')' StmtBlock                      {$$ = new WhileStmt($3, $5);}
