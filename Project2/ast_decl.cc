@@ -26,7 +26,7 @@ void VarDecl::PrintChildren(int indentLevel) {
    if (type) type->Print(indentLevel+1);
    if (id) id->Print(indentLevel+1);
    if (expr) {
-      printf("\n            Assignment");
+      printf("\n            AssignExpr:");
       expr->Print(indentLevel+1);
       }
 }
