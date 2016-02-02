@@ -211,8 +211,7 @@ Decl      :    VarDecl                                    {$$ = $1;}
           ;
           
 VarDecl   :   Var ';'          	                          { $$ = $1;}
-          |   Type Identifier '=' PriExpr ';'             {/*printf("here"); 
-	  						  VarDecl *n1 = new VarDecl($2,$1); Expr* = new AssignExpr($2, new Operator(@1, "="), $4);*/}
+          |   Type Identifier '=' PriExpr ';'             { $$ = new VarDecl($2, $1,$4);}
 	  ;
 
 Var       :  Type Identifier        			  {$$= new VarDecl($2,$1);}
@@ -319,9 +318,9 @@ UnaryOper : T_Plus                                        {$$= new Operator(@1, 
           ;
           
 UnaryExpr : PostExpr					  {$$ = $1;}
-	  | T_Inc UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "++"));}
-	  | T_Dec UnaryExpr				  {$$ = new PostfixExpr($2, new Operator(@1, "--"));}
-	  | UnaryOper UnaryExpr				  {$$ = new PostfixExpr($2, $1);}
+	  | T_Inc UnaryExpr				  {$$ = new ArithmeticExpr(new Operator(@1, "++"),$2);}
+	  | T_Dec UnaryExpr				  {$$ = new ArithmeticExpr( new Operator(@1, "--"),$2);}
+	  | UnaryOper UnaryExpr				  {$$ = new ArithmeticExpr($1,$2);}
 	  ;
 
 SimpleStmt : ExprStmt                                     { $$ =$1;}

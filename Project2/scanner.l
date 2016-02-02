@@ -55,7 +55,7 @@ OPERATOR          ([-+/*%=.,;!<>()[\]{}:])
 BEG_COMMENT       ("/*")
 END_COMMENT       ("*/")
 SINGLE_COMMENT    ("//"[^\n]*)
-SWIZZLE 	  (x?y?z?w?)
+SWIZZLE 	  (x?y?w?z?)
 
 %%             /* BEGIN RULES SECTION */
 

@@ -11,11 +11,14 @@
 
 #include "ast.h"
 #include "list.h"
+#include "ast_expr.h"
+#include <stdio.h>  // printf
 
 class Type;
 class NamedType;
 class Identifier;
 class Stmt;
+class Expr;
 
 void yyerror(const char *msg);
 
@@ -33,10 +36,12 @@ class VarDecl : public Decl
 {
   protected:
     Type *type;
-    
+    Expr *expr;    
+
   public:
     VarDecl() : type(NULL) {}
     VarDecl(Identifier *name, Type *type);
+    VarDecl(Identifier *name, Type *type, Expr *expr);
     const char *GetPrintNameForNode() { return "VarDecl"; }
     void PrintChildren(int indentLevel);
 };

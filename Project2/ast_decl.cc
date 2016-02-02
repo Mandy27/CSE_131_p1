@@ -17,10 +17,18 @@ VarDecl::VarDecl(Identifier *n, Type *t) : Decl(n) {
     Assert(n != NULL && t != NULL);
     (type=t)->SetParent(this);
 }
-  
+VarDecl::VarDecl(Identifier *n, Type *t,Expr* e) : Decl(n) {
+    Assert(n != NULL && t != NULL);
+    (type=t)->SetParent(this);
+    (expr=e)->SetParent(this);    
+}  
 void VarDecl::PrintChildren(int indentLevel) { 
    if (type) type->Print(indentLevel+1);
    if (id) id->Print(indentLevel+1);
+   if (expr) {
+      printf("\n            Assignment");
+      expr->Print(indentLevel+1);
+      }
 }
 
 
